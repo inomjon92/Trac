@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Yuk Nazorat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: dispatch console. Top bar with tabs; monitoring = list | schematic map | truck card. */
+:root {
+  --bg: #eef1f0;
+  --surface: #ffffff;
+  --surface-2: #f6f8f7;
+  --ink: #15201e;
+  --muted: #5b6a66;
+  --line: #d8dfdc;
+  --accent: #2563c9;
+  --accent-soft: rgba(37, 99, 201, .12);
+  --map-bg: #e3eae7;
+  --grid: #d3dcd8;
+  --road: #a9b8b2;
+  --city: #3b4a46;
+  --ok: #17924d;
+  --warn: #c47a00;
+  --crit: #d23b2f;
+  --off: #8a9792;
+  --font-ui: "Golos Text", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1413; --surface: #151d1c; --surface-2: #1a2422; --ink: #e5edea; --muted: #8e9e99;
+    --line: #26322f; --accent: #6ea2ff; --accent-soft: rgba(110, 162, 255, .16);
+    --map-bg: #111918; --grid: #1d2826; --road: #34443f; --city: #b7c6c1;
+    --ok: #3fcf7c; --warn: #f0a530; --crit: #ff6b5e; --off: #6f7f7a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1413; --surface: #151d1c; --surface-2: #1a2422; --ink: #e5edea; --muted: #8e9e99;
+  --line: #26322f; --accent: #6ea2ff; --accent-soft: rgba(110, 162, 255, .16);
+  --map-bg: #111918; --grid: #1d2826; --road: #34443f; --city: #b7c6c1;
+  --ok: #3fcf7c; --warn: #f0a530; --crit: #ff6b5e; --off: #6f7f7a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
+.num, .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.topbar-in { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+.brand-mark { width: 28px; height: 28px; border-radius: 7px; background: var(--ink); display: grid; place-items: center; }
+.brand-mark svg { display: block; }
+.demo-pill { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--warn); border: 1px solid currentColor; border-radius: 99px; padding: 1px 8px; }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; flex: 1 1 auto; min-width: 0; }
+nav.tabs a { text-decoration: none; color: var(--muted); padding: 7px 12px; border-radius: 7px; white-space: nowrap; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+nav.tabs a:hover { background: var(--surface-2); color: var(--ink); }
+nav.tabs a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+.badge { background: var(--crit); color: #fff; font-size: 11px; font-weight: 600; border-radius: 99px; padding: 0 6px; min-width: 18px; text-align: center; }
+.clock { font-family: var(--font-data); font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 var(--ok); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(23,146,77,.5); } 70% { box-shadow: 0 0 0 7px rgba(23,146,77,0); } 100% { box-shadow: 0 0 0 0 rgba(23,146,77,0); } }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none; } }
+
+main { padding-block: 16px 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+.view[hidden] { display: none !important; }
+.view { display: grid; gap: 16px; min-width: 0; }
+h2 { margin: 0; font-size: 18px; letter-spacing: -.01em; text-wrap: balance; }
+.sub { color: var(--muted); font-size: 13px; }
+
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.kpi { background: var(--surface); padding: 10px 14px; display: grid; gap: 2px; min-width: 0; }
+.kpi .lab { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; }
+.kpi .val { font-family: var(--font-data); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kpi .val small { font-size: 12px; color: var(--muted); margin-left: 3px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.s-move { --s: var(--ok); } .s-idle { --s: var(--warn); } .s-stop { --s: var(--off); } .s-offline { --s: var(--crit); }
+.dot.s-move, .dot.s-idle, .dot.s-stop, .dot.s-offline { background: var(--s); }
+
+.monitor { display: grid; grid-template-columns: 290px minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.panel-head h3 { margin: 0; font-size: 14px; }
+.search { width: 100%; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 7px; padding: 7px 10px; font: inherit; }
+.truck-list { list-style: none; margin: 0; padding: 4px; display: grid; gap: 2px; max-height: 560px; overflow-y: auto; }
+.truck-item { width: 100%; text-align: left; border: 0; background: transparent; border-radius: 8px; padding: 9px 10px; display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; align-items: center; }
+.truck-item:hover { background: var(--surface-2); }
+.truck-item[aria-pressed="true"] { background: var(--accent-soft); }
+.truck-item .plate { font-family: var(--font-data); font-weight: 500; font-size: 13px; }
+.truck-item .meta { grid-column: 2 / 4; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.truck-item .spd { font-family: var(--font-data); font-size: 12.5px; color: var(--muted); }
+.pill { font-size: 11.5px; font-weight: 600; border-radius: 99px; padding: 2px 8px; color: var(--s); background: color-mix(in srgb, var(--s) 14%, transparent); white-space: nowrap; }
+
+.map-wrap { position: relative; overflow: hidden; }
+.map-wrap svg { display: block; width: 100%; height: auto; background: var(--map-bg); border-radius: 0 0 10px 10px; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.map-note { position: absolute; right: 12px; bottom: 10px; font-size: 11.5px; color: var(--muted); background: color-mix(in srgb, var(--surface) 85%, transparent); padding: 3px 8px; border-radius: 6px; }
+.truck-mark { cursor: pointer; }
+.truck-mark text { font-family: var(--font-data); font-size: 12px; font-weight: 500; fill: var(--ink); paint-order: stroke; stroke: var(--map-bg); stroke-width: 4px; }
+
+.card { padding: 14px; display: grid; gap: 14px; }
+.card .plate-big { font-family: var(--font-data); font-size: 20px; font-weight: 500; letter-spacing: .02em; }
+.plate-badge { display: inline-flex; align-items: center; border: 2px solid var(--ink); border-radius: 5px; overflow: hidden; }
+.plate-badge .reg { padding: 2px 7px; border-right: 2px solid var(--ink); }
+.plate-badge .rest { padding: 2px 8px; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.kv div { display: grid; gap: 1px; min-width: 0; }
+.kv dt { font-size: 11.5px; color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--font-data); font-size: 15px; font-variant-numeric: tabular-nums; }
+.fuelbar { height: 8px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+.fuelbar i { display: block; height: 100%; background: var(--ok); }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: 7px; padding: 7px 12px; font-weight: 500; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { color: #fff; filter: brightness(1.08); }
+.spark { width: 100%; height: 56px; display: block; }
+
+/* alerts */
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 5px 12px; font-size: 13px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.alert-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.alert { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-columns: 4px auto 1fr auto; gap: 0 14px; align-items: center; overflow: hidden; }
+.alert .stripe { align-self: stretch; background: var(--s); }
+.alert .time { font-family: var(--font-data); color: var(--muted); font-size: 13px; padding-block: 12px; }
+.alert .body { padding-block: 10px; min-width: 0; }
+.alert .title { font-weight: 600; }
+.alert .desc { color: var(--muted); font-size: 13px; }
+.alert .act { padding-right: 12px; }
+.alert.read { opacity: .55; }
+.sev-crit { --s: var(--crit); } .sev-warn { --s: var(--warn); } .sev-info { --s: var(--accent); }
+.tg-note { font-size: 13px; color: var(--muted); }
+
+/* fuel + reports */
+.chart-panel { padding: 14px; display: grid; gap: 10px; }
+.chart-panel svg { width: 100%; height: auto; display: block; }
+.facts { display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; }
+.facts b { font-family: var(--font-data); font-weight: 500; font-size: 15px; display: block; }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+td.n, th.n { text-align: right; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+.bad { color: var(--crit); font-weight: 600; }
+.hbar { display: grid; grid-template-columns: 110px 1fr 64px; gap: 10px; align-items: center; font-size: 13px; }
+.hbar .track { height: 14px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.hbar .track i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.hbars { display: grid; gap: 8px; padding: 14px; }
+.foot { font-size: 12.5px; color: var(--muted); }
+
+@media (max-width: 1180px) {
+  .monitor { grid-template-columns: 260px minmax(0, 1fr); }
+  .monitor .detail { grid-column: 1 / -1; }
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .monitor { grid-template-columns: minmax(0, 1fr); }
+  .monitor .map-panel { order: -1; }
+  .truck-list { max-height: 320px; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .alert { grid-template-columns: 4px 1fr auto; }
+  .alert .time { display: none; }
+  .hbar { grid-template-columns: 90px 1fr 56px; }
+  .map-note { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Z" fill="var(--surface)"/><circle cx="12" cy="9" r="2.6" fill="var(--ink)"/></svg></span>
+      Yuk Nazorat <span class="demo-pill">Demo</span>
+    </div>
+    <nav class="tabs" aria-label="Boʻlimlar">
+      <a href="#xarita" data-view="xarita">Xarita</a>
+      <a href="#yoqilgi" data-view="yoqilgi">Yoqilgʻi</a>
+      <a href="#ogohlantirish" data-view="ogohlantirish">Ogohlantirishlar <span class="badge" id="alertBadge">0</span></a>
+      <a href="#hisobot" data-view="hisobot">Hisobotlar</a>
+    </nav>
+    <div class="clock"><span class="live-dot" aria-hidden="true"></span><span id="clock">27.10.2026 08:40</span></div>
+  </div>
+</header>
+
+<main>
+  <!-- MONITORING -->
+  <section class="view" id="view-xarita">
+    <div class="kpis" id="kpis"></div>
+    <div class="monitor">
+      <div class="panel">
+        <div class="panel-head" style="display:grid; grid-template-columns:minmax(0,1fr); gap:8px">
+          <h3>Mashinalar</h3>
+          <input class="search" id="search" type="search" placeholder="Raqam yoki haydovchi boʻyicha qidirish" aria-label="Qidirish">
+        </div>
+        <ul class="truck-list" id="truckList"></ul>
+      </div>
+      <div class="panel map-panel">
+        <div class="panel-head">
+          <h3>Onlayn kuzatuv</h3>
+          <div class="legend">
+            <span><i class="dot s-move"></i>Harakatda</span>
+            <span><i class="dot s-idle"></i>Salt ishlayapti</span>
+            <span><i class="dot s-stop"></i>Toʻxtagan</span>
+            <span><i class="dot s-offline"></i>Aloqa yoʻq</span>
+          </div>
+        </div>
+        <div class="map-wrap">
+          <svg id="map" viewBox="0 0 1110 640" role="img" aria-label="Oʻzbekiston boʻylab yuk mashinalari joylashuvi"></svg>
+          <div class="map-note">Sxematik xarita. Haqiqiy tizimda OpenStreetMap, Yandex yoki 2GIS xaritasi boʻladi.</div>
+        </div>
+      </div>
+      <div class="panel detail" id="detail"></div>
+    </div>
+  </section>
+
+  <!-- FUEL -->
+  <section class="view" id="view-yoqilgi" hidden>
+    <div class="toolbar">
+      <div><h2>Yoqilgʻi nazorati</h2><div class="sub">Bak sathi datchigi boʻyicha oxirgi 24 soat</div></div>
+      <div class="chips" id="fuelChips"></div>
+    </div>
+    <div class="panel chart-panel">
+      <div class="facts" id="fuelFacts"></div>
+      <svg id="fuelChart" viewBox="0 0 1100 300" role="img" aria-label="Yoqilgʻi darajasi grafigi"></svg>
+    </div>
+    <div class="panel tbl-wrap">
+      <table>
+        <thead><tr><th>Mashina</th><th>Haydovchi</th><th class="n">Hozir, L</th><th class="n">Quyildi, L</th><th class="n">Toʻkildi, L</th><th class="n">Sarf 24 soat, L</th></tr></thead>
+        <tbody id="fuelTable"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ALERTS -->
+  <section class="view" id="view-ogohlantirish" hidden>
+    <div class="toolbar">
+      <div><h2>Ogohlantirishlar</h2><div class="tg-note">Har bir ogohlantirish Telegram botga ham yuboriladi.</div></div>
+      <div class="chips" id="alertChips">
+        <button class="chip" data-f="all" aria-pressed="true">Hammasi</button>
+        <button class="chip" data-f="crit" aria-pressed="false">Muhim</button>
+        <button class="chip" data-f="warn" aria-pressed="false">Diqqat</button>
+        <button class="chip" data-f="info" aria-pressed="false">Maʼlumot</button>
+        <button class="chip" id="readAll">Hammasini koʻrildi qilish</button>
+      </div>
+    </div>
+    <ul class="alert-list" id="alertList"></ul>
+  </section>
+
+  <!-- REPORTS -->
+  <section class="view" id="view-hisobot" hidden>
+    <div class="toolbar">
+      <div><h2>Kunlik hisobot</h2><div class="sub">27.10.2026, 00:00 dan hozirgacha. Haqiqiy tizimda Excel va PDF formatida yuklab olinadi.</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Bugungi probeg, km</h3></div>
+      <div class="hbars" id="kmBars"></div>
+    </div>
+    <div class="panel tbl-wrap">
+      <table>
+        <thead><tr><th>Mashina</th><th>Haydovchi</th><th class="n">Probeg, km</th><th class="n">Harakatda, soat</th><th class="n">Salt, soat</th><th class="n">Sarf, L</th><th class="n">L/100 km</th><th class="n">Tezlik buzish</th></tr></thead>
+        <tbody id="reportTable"></tbody>
+      </table>
+    </div>
+    <p class="foot">Me’yor: 33 L/100 km. Undan 10% dan ortiq sarf qizil rangda koʻrsatiladi.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  // ---------- geography (schematic) ----------
+  const C = {
+    tosh: [69.24, 41.31, "Toshkent"], gis: [69.35, 41.52, "Gʻishtkoʻprik"], gul: [68.78, 40.49, "Guliston"],
+    jiz: [67.84, 40.12, "Jizzax"], sam: [66.96, 39.65, "Samarqand"], nav: [65.38, 40.10, "Navoiy"],
+    bux: [64.42, 39.77, "Buxoro"], qar: [65.79, 38.86, "Qarshi"], gzr: [66.25, 38.62, null],
+    shr: [67.0, 37.67, null], ter: [67.28, 37.22, "Termiz"], des: [62.6, 40.9, null],
+    urg: [60.63, 41.55, "Urganch"], nuk: [59.61, 42.46, "Nukus"], ang: [70.14, 41.02, "Angren"],
+    kam: [70.65, 40.98, null], qoq: [70.94, 40.53, "Qoʻqon"], far: [71.78, 40.39, "Fargʻona"],
+    and: [72.34, 40.78, "Andijon"], nam: [71.67, 41.0, "Namangan"]
+  };
+  const ROADS = [["tosh","gis"],["tosh","gul"],["gul","jiz"],["jiz","sam"],["sam","nav"],["nav","bux"],["bux","des"],["des","urg"],["urg","nuk"],["sam","gzr"],["gzr","qar"],["gzr","shr"],["shr","ter"],["qar","bux"],["tosh","ang"],["ang","kam"],["kam","qoq"],["qoq","far"],["far","and"],["kam","nam"],["nam","and"]];
+  const P = (lon, lat) => [(lon - 58.6) * 75.5 + 24, (43.0 - lat) * 100 + 24];
+  const km = (a, b) => { const la = (a[1] + b[1]) / 2 * Math.PI / 180; return Math.hypot((b[0] - a[0]) * 111.3 * Math.cos(la), (b[1] - a[1]) * 111.3) * 1.12; };
+  function route(keys) { const pts = keys.map(k => C[k]); const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + km(pts[i - 1], pts[i])); return { keys, pts, cum, len: cum.at(-1) }; }
+  function posAt(r, s, dir) {
+    s = Math.max(0, Math.min(r.len, s));
+    let i = 0; while (i < r.cum.length - 2 && s > r.cum[i + 1]) i++;
+    const a = r.pts[i], b = r.pts[i + 1], t = (s - r.cum[i]) / ((r.cum[i + 1] - r.cum[i]) || 1);
+    const lon = a[0] + (b[0] - a[0]) * t, lat = a[1] + (b[1] - a[1]) * t;
+    const pa = P(a[0], a[1]), pb = P(b[0], b[1]);
+    let ang = Math.atan2(pb[1] - pa[1], pb[0] - pa[0]) * 180 / Math.PI; if (dir < 0) ang += 180;
+    return { lon, lat, ang, from: r.keys[dir > 0 ? 0 : r.keys.length - 1], to: r.keys[dir > 0 ? r.keys.length - 1 : 0] };
+  }
+  function nearest(lon, lat) {
+    let best = null, bd = 1e9;
+    for (const k in C) { if (!C[k][2]) continue; const d = km([lon, lat], C[k]) / 1.12; if (d < bd) { bd = d; best = C[k][2]; } }
+    return bd < 12 ? best : best + " dan " + Math.round(bd) + " km";
+  }
+
+  // ---------- trucks (demo data) ----------
+  const T = [
+    { id: 1, reg: "01", num: "245 ABC", model: "MAN TGX 18.440", driver: "Rustam Karimov", r: route(["tosh","gul","jiz","sam","nav","bux"]), f: .38, dir: 1, status: "move", tank: 600, km0: 184, viol: 0 },
+    { id: 2, reg: "01", num: "318 BCA", model: "Volvo FH 460", driver: "Jamshid Aliyev", r: route(["tosh","ang","kam","qoq","far","and"]), f: .55, dir: 1, status: "move", tank: 500, km0: 152, viol: 1 },
+    { id: 3, reg: "30", num: "112 AAB", model: "Shacman X3000", driver: "Sherzod Toshmatov", r: route(["sam","gzr","shr","ter"]), f: .3, dir: 1, status: "move", tank: 400, km0: 210, viol: 0 },
+    { id: 4, reg: "80", num: "554 ADA", model: "Howo T7H", driver: "Bekzod Nurmatov", r: route(["bux","des","urg","nuk"]), f: .42, dir: 1, status: "move", tank: 400, km0: 236, viol: 0 },
+    { id: 5, reg: "01", num: "907 AKA", model: "Mercedes Actros 1845", driver: "Dilshod Rahimov", at: [69.21, 41.27], status: "stop", tank: 500, km0: 38, viol: 0 },
+    { id: 6, reg: "40", num: "223 BAB", model: "Isuzu Giga", driver: "Ulugʻbek Sobirov", at: [71.80, 40.37], status: "idle", tank: 300, km0: 64, viol: 0 },
+    { id: 7, reg: "70", num: "681 ACA", model: "Kamaz 5490", driver: "Otabek Yusupov", at: [65.83, 38.84], status: "offline", tank: 400, km0: 121, viol: 0 },
+    { id: 8, reg: "10", num: "436 AMA", model: "MAN TGS 26.400", driver: "Akmal Qodirov", r: route(["jiz","gul","tosh"]), f: .2, dir: 1, status: "move", tank: 400, km0: 95, viol: 2 }
+  ];
+  const plate = t => t.reg + " " + t.num;
+  let simMin = 8 * 60 + 40; // 08:40
+  let selected = 1, showTrail = true, fuelSel = 4, alertFilter = "all", route_ = "xarita", query = "";
+  const hhmm = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
+
+  // fuel history: 49 points, every 30 min, last = now
+  const FUELCFG = {
+    1: { now: 265, refuel: [30, 330], use: 9 },
+    2: { now: 240, refuel: [34, 150], use: 8 },
+    3: { now: 150, refuel: [28, 220], use: 8.5 },
+    4: { now: 190, drain: [38, 65], use: 9 },
+    5: { now: 410, refuel: [44, 60], use: 0 },
+    6: { now: 180, use: 1.2 },
+    7: { now: 210, use: 8.5, cutoff: 44 },
+    8: { now: 210, refuel: [36, 250], use: 7 }
+  };
+  T.forEach(t => {
+    const c = FUELCFG[t.id]; const h = new Array(49); let v = c.now;
+    t.refuelL = 0; t.drainL = 0; t.used = 0; h[48] = v;
+    for (let i = 48; i >= 1; i--) {
+      const hr = (((simMin - (48 - i) * 30) % 1440) + 1440) % 1440 / 60;
+      const parked = hr >= 23 || hr < 5 || (c.cutoff && i > c.cutoff);
+      const u = parked ? 0 : c.use * (0.85 + ((i * 37 + t.id * 11) % 10) / 33);
+      t.used += u; v += u;
+      if (c.refuel && i === c.refuel[0]) { v -= c.refuel[1]; t.refuelL = c.refuel[1]; t.refuelAt = i; }
+      if (c.drain && i === c.drain[0]) { v += c.drain[1]; t.drainL = c.drain[1]; t.drainAt = i; }
+      v = Math.max(20, Math.min(t.tank, v)); h[i - 1] = v;
+    }
+    t.hist = h.map((v, i) => ({ i, v: c.cutoff && i > c.cutoff ? null : v })); t.fuel = c.cutoff ? h[c.cutoff] : c.now;
+    t.speed = t.status === "move" ? 62 + (t.id * 7) % 25 : 0;
+    t.s = t.r ? t.r.len * t.f : 0; t.trail = []; t.todayKm = t.km0; t.pause = 0;
+    t.volt = t.status === "offline" ? 0 : (t.status === "stop" ? 25.1 : 27.6 + (t.id % 3) / 10);
+    t.odo = 180000 + t.id * 53117 % 400000;
+    t.last = t.status === "offline" ? simMin - 122 : simMin;
+    t.idleMin = t.status === "idle" ? 25 : 0;
+  });
+  T.forEach(t => { if (t.status === "offline") { t.speed = 0; } });
+
+  // ---------- alerts ----------
+  const alerts = [];
+  let alertSeq = 0;
+  function addAlert(sev, t, title, desc, m) { alerts.unshift({ id: ++alertSeq, sev, t, title, desc, m: m ?? simMin, read: false }); renderBadge(); if (route_ === "ogohlantirish") renderAlerts(); }
+  const T_ = id => T.find(t => t.id === id);
+  addAlert("info", T_(1), "Geozonaga kirdi: Guliston AYOQSH", "Yoqilgʻi quyish shoxobchasi. Turish vaqti 18 daqiqa.", 7 * 60 + 5);
+  addAlert("warn", T_(2), "Tezlik oshirildi: 97 km/soat", "Chegara 90 km/soat. Toshkent – Angren yoʻli.", 7 * 60 + 55);
+  addAlert("crit", T_(4), "Yoqilgʻi toʻkildi: −65 L", "Buxoro – Urganch yoʻli, mashina toʻxtab turgan paytda. Soat 03:40 da.", 3 * 60 + 41);
+  addAlert("warn", T_(6), "Uzoq salt ishlash: 25 daqiqa", "Dvigatel ishlab turibdi, tezlik 0. Fargʻona ombori.", 8 * 60 + 40);
+  addAlert("crit", T_(7), "Aloqa yoʻq: 2 soatdan beri", "Oxirgi nuqta Qarshi yaqinida. Quvvat uzilgan yoki qurilma oʻchirilgan boʻlishi mumkin.", 6 * 60 + 38);
+  alerts.sort((a, b) => b.m - a.m);
+
+  // ---------- map ----------
+  const svg = document.getElementById("map");
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  function drawBase() {
+    const g = el("g", {}, svg);
+    for (const lat of [38, 40, 42]) { const [, y] = P(60, lat); el("line", { x1: 0, x2: 1110, y1: y, y2: y, stroke: "var(--grid)", "stroke-width": 1 }, g); const t = el("text", { x: 8, y: y - 6, fill: "var(--muted)", "font-size": 13, "font-family": "var(--font-data)" }, g); t.textContent = lat + "°N"; }
+    for (const lon of [60, 64, 68, 72]) { const [x] = P(lon, 40); el("line", { x1: x, x2: x, y1: 0, y2: 640, stroke: "var(--grid)", "stroke-width": 1 }, g); const t = el("text", { x: x + 6, y: 632, fill: "var(--muted)", "font-size": 13, "font-family": "var(--font-data)" }, g); t.textContent = lon + "°E"; }
+    const rg = el("g", { stroke: "var(--road)", "stroke-width": 4, "stroke-linecap": "round", fill: "none" }, svg);
+    ROADS.forEach(([a, b]) => { const pa = P(C[a][0], C[a][1]), pb = P(C[b][0], C[b][1]); el("line", { x1: pa[0], y1: pa[1], x2: pb[0], y2: pb[1] }, rg); });
+    const cg = el("g", {}, svg);
+    for (const k in C) {
+      if (!C[k][2]) continue; const [x, y] = P(C[k][0], C[k][1]);
+      el("circle", { cx: x, cy: y, r: k === "tosh" ? 6 : 4, fill: "var(--surface)", stroke: "var(--city)", "stroke-width": 2 }, cg);
+      const left = ["gis", "nam", "tosh", "and"].includes(k);
+      const dy = { gis: -6, tosh: 5, and: -10, nam: -8 }[k] ?? 16;
+      const t = el("text", { x: k === "far" ? x : x + (left ? -10 : 9), y: y + (k === "far" ? 22 : dy), "text-anchor": k === "far" ? "middle" : left ? "end" : "start", fill: "var(--city)", "font-size": k === "tosh" ? 16 : 14, "font-weight": k === "tosh" ? 600 : 500 }, cg);
+      t.textContent = C[k][2];
+    }
+  }
+  drawBase();
+  const trailPath = el("path", { fill: "none", stroke: "var(--accent)", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-dasharray": "1 0" }, svg);
+  const marks = {};
+  T.forEach(t => {
+    const g = el("g", { class: "truck-mark", tabindex: 0, role: "button", "aria-label": plate(t) }, svg);
+    const ring = el("circle", { r: 16, fill: "none", stroke: "var(--accent)", "stroke-width": 3, opacity: 0 }, g);
+    const body = el("circle", { r: 10, stroke: "var(--surface)", "stroke-width": 2.5 }, g);
+    const arrow = el("path", { d: "M-4 -4 L5 0 L-4 4 Z", fill: "#fff" }, g);
+    const lab = el("text", { x: 0, y: -20, "text-anchor": "middle" }, g); lab.textContent = plate(t);
+    g.addEventListener("click", () => select(t.id));
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id); } });
+    marks[t.id] = { g, ring, body, arrow, lab };
+  });
+  const STATUS = { move: ["Harakatda", "var(--ok)"], idle: ["Salt ishlayapti", "var(--warn)"], stop: ["Toʻxtagan", "var(--off)"], offline: ["Aloqa yoʻq", "var(--crit)"] };
+  function where(t) {
+    if (t.r) { const p = posAt(t.r, t.s, t.dir); return p; }
+    return { lon: t.at[0], lat: t.at[1], ang: 0 };
+  }
+  function drawTrucks() {
+    T.forEach(t => {
+      const p = where(t); const [x, y] = P(p.lon, p.lat); t.x = x; t.y = y; t.lon = p.lon; t.lat = p.lat; t.pos = p;
+      const m = marks[t.id];
+      m.g.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      m.body.setAttribute("fill", STATUS[t.status][1]);
+      m.arrow.setAttribute("transform", `rotate(${p.ang.toFixed(0)})`);
+      m.arrow.setAttribute("opacity", t.status === "move" ? 1 : 0);
+      const sel = t.id === selected;
+      m.ring.setAttribute("opacity", sel ? 1 : 0);
+      m.lab.setAttribute("opacity", sel ? 1 : 0);
+      if (sel) svg.appendChild(m.g);
+    });
+    const s = T_(selected);
+    trailPath.setAttribute("d", showTrail && s.trail.length > 1 ? "M" + s.trail.map(p => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L") : "");
+  }
+
+  // ---------- state + views ----------
+
+  function renderKpis() {
+    const n = s => T.filter(t => t.status === s).length;
+    const totalKm = T.reduce((a, t) => a + t.todayKm, 0);
+    const fuelUsed = T.reduce((a, t) => a + t.todayKm * 0.33, 0);
+    document.getElementById("kpis").innerHTML = [
+      ["Jami mashina", T.length, "", ""], ["Harakatda", n("move"), "", "s-move"], ["Toʻxtagan / salt", n("stop") + n("idle"), "", "s-idle"],
+      ["Aloqa yoʻq", n("offline"), "", "s-offline"], ["Bugungi probeg", Math.round(totalKm).toLocaleString("ru-RU"), "km", ""], ["Yoqilgʻi sarfi", Math.round(fuelUsed).toLocaleString("ru-RU"), "L", ""]
+    ].map(([l, v, u, s]) => `<div class="kpi"><span class="lab">${s ? `<i class="dot ${s}"></i>` : ""}${l}</span><span class="val">${v}${u ? `<small>${u}</small>` : ""}</span></div>`).join("");
+  }
+  function ago(t) { const d = simMin - t.last; if (d < 2) return "hozir"; if (d < 60) return d + " daqiqa oldin"; return Math.floor(d / 60) + " soat oldin"; }
+  function renderList() {
+    const q = query.trim().toLowerCase();
+    document.getElementById("truckList").innerHTML = T.filter(t => !q || (plate(t) + " " + t.driver + " " + t.model).toLowerCase().includes(q)).map(t => `
+      <li><button class="truck-item s-${t.status}" data-id="${t.id}" aria-pressed="${t.id === selected}">
+        <span class="plate">${plate(t)}</span>
+        <span class="pill">${STATUS[t.status][0]}</span>
+        <span class="spd">${t.status === "move" ? Math.round(t.speed) + " km/s" : ""}</span>
+        <span class="meta">${t.driver} · ${Math.round(t.fuel)} L · ${t.status === "offline" ? ago(t) : nearest(t.lon, t.lat)}</span>
+      </button></li>`).join("") || `<li class="sub" style="padding:12px">Hech narsa topilmadi.</li>`;
+  }
+  function spark(t) {
+    const pts = t.hist.filter(p => p.v != null); const w = 270, h = 56;
+    const X = i => i / 48 * w, Y = v => h - 4 - v / t.tank * (h - 8);
+    const d = pts.map((p, k) => (k ? "L" : "M") + X(p.i).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ");
+    const last = pts.at(-1);
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d} L${X(last.i)} ${h} L0 ${h} Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  function renderDetail() {
+    const t = T_(selected); const pct = Math.round(t.fuel / t.tank * 100);
+    const loc = t.r && t.status !== "offline" ? `${C[t.pos.from][2]} → ${C[t.pos.to][2]}` : "Reys yoʻq";
+    document.getElementById("detail").innerHTML = `
+      <div class="panel-head"><h3>Mashina kartochkasi</h3><span class="pill s-${t.status}">${STATUS[t.status][0]}</span></div>
+      <div class="card">
+        <div style="display:grid; gap:6px">
+          <span class="plate-badge mono"><span class="reg">${t.reg}</span><span class="rest">${t.num}</span></span>
+          <div class="sub">${t.model} · ${t.driver}</div>
+        </div>
+        <dl class="kv" style="margin:0">
+          <div><dt>Tezlik</dt><dd>${Math.round(t.speed)} km/soat</dd></div>
+          <div><dt>Oxirgi aloqa</dt><dd>${ago(t)}</dd></div>
+          <div><dt>Joylashuv</dt><dd style="font-family:var(--font-ui);font-size:14px">${nearest(t.lon, t.lat)}</dd></div>
+          <div><dt>Reys</dt><dd style="font-family:var(--font-ui);font-size:14px">${loc}</dd></div>
+          <div><dt>Bort kuchlanishi</dt><dd>${t.volt ? t.volt.toFixed(1) + " V" : "—"}</dd></div>
+          <div><dt>Bugun yurdi</dt><dd>${Math.round(t.todayKm)} km</dd></div>
+          <div><dt>Odometr</dt><dd>${Math.round(t.odo).toLocaleString("ru-RU")} km</dd></div>
+          <div><dt>Koordinata</dt><dd style="font-size:12.5px">${t.lat.toFixed(4)}, ${t.lon.toFixed(4)}</dd></div>
+        </dl>
+        <div style="display:grid; gap:6px">
+          <div style="display:flex;justify-content:space-between" class="sub"><span>Yoqilgʻi</span><span class="mono" style="color:var(--ink)">${Math.round(t.fuel)} / ${t.tank} L · ${pct}%</span></div>
+          <div class="fuelbar"><i style="width:${pct}%; background:${pct < 20 ? "var(--crit)" : pct < 35 ? "var(--warn)" : "var(--ok)"}"></i></div>
+          ${spark(t)}
+          <div class="sub" style="font-size:12px">Oxirgi 24 soat</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="toFuel">Yoqilgʻi grafigi</button>
+          ${t.r ? `<button class="btn" id="trailBtn" aria-pressed="${showTrail}">${showTrail ? "Trekni yashirish" : "Trekni koʻrsatish"}</button>` : ""}
+        </div>
+      </div>`;
+    document.getElementById("toFuel").onclick = () => { fuelSel = t.id; location.hash = "yoqilgi"; };
+    const tb = document.getElementById("trailBtn"); if (tb) tb.onclick = () => { showTrail = !showTrail; renderDetail(); drawTrucks(); };
+  }
+  function select(id) { selected = id; renderList(); renderDetail(); drawTrucks(); }
+  document.getElementById("truckList").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) select(+b.dataset.id); });
+  document.getElementById("search").addEventListener("input", e => { query = e.target.value; renderList(); });
+
+  // fuel view
+  function renderFuel() {
+    document.getElementById("fuelChips").innerHTML = T.map(t => `<button class="chip" data-id="${t.id}" aria-pressed="${t.id === fuelSel}">${plate(t)}</button>`).join("");
+    const t = T_(fuelSel);
+    const W = 1100, H = 300, L = 52, R = 16, Tp = 18, B = 34;
+    const X = i => L + i / 48 * (W - L - R), Y = v => Tp + (1 - v / t.tank) * (H - Tp - B);
+    let g = "";
+    const step = t.tank > 400 ? 200 : 100;
+    for (let v = 0; v <= t.tank; v += step) g += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${L - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--font-data)">${v}</text>`;
+    for (let i = 0; i <= 48; i += 8) g += `<text x="${X(i)}" y="${H - 10}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--font-data)">${hhmm(simMin - (48 - i) * 30)}</text>`;
+    g += `<text x="${L - 8}" y="10" text-anchor="end" font-size="11.5" fill="var(--muted)">L</text>`;
+    const pts = t.hist.filter(p => p.v != null);
+    const d = pts.map((p, k) => (k ? "L" : "M") + X(p.i).toFixed(1) + " " + Y(p.v).toFixed(1)).join(" ");
+    g += `<path d="${d} L${X(pts.at(-1).i)} ${Y(0)} L${X(pts[0].i)} ${Y(0)} Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linejoin="round"/>`;
+    const ev = (i, color, label) => { const v = t.hist[i].v; const x = X(i), y = Y(v); const anchor = x > W - 140 ? "end" : "start"; return `<circle cx="${x}" cy="${y}" r="6" fill="${color}" stroke="var(--surface)" stroke-width="2"/><text x="${x + (anchor === "end" ? -10 : 10)}" y="${y - 10}" text-anchor="${anchor}" font-size="12.5" font-weight="600" fill="${color}">${label}</text>`; };
+    if (t.refuelAt != null) g += ev(t.refuelAt, "var(--ok)", `Quyildi +${t.refuelL} L, ${hhmm(simMin - (48 - t.refuelAt) * 30)}`);
+    if (t.drainAt != null) g += ev(t.drainAt, "var(--crit)", `Toʻkildi −${t.drainL} L, ${hhmm(simMin - (48 - t.drainAt) * 30)}`);
+    const lastP = pts.at(-1); g += `<circle cx="${X(lastP.i)}" cy="${Y(lastP.v)}" r="4" fill="var(--accent)"/>`;
+    if (t.status === "offline") g += `<text x="${X(lastP.i) + 8}" y="${Y(lastP.v) + 18}" font-size="12" fill="var(--crit)">aloqa uzildi</text>`;
+    document.getElementById("fuelChart").innerHTML = g;
+    document.getElementById("fuelFacts").innerHTML = `
+      <div><span class="sub">${t.model} · ${t.driver}</span><b>${plate(t)}</b></div>
+      <div><span class="sub">Hozir bakda</span><b>${Math.round(t.fuel)} L</b></div>
+      <div><span class="sub">Quyildi</span><b style="color:var(--ok)">${t.refuelL} L</b></div>
+      <div><span class="sub">Toʻkildi</span><b style="color:${t.drainL ? "var(--crit)" : "inherit"}">${t.drainL} L</b></div>
+      <div><span class="sub">Sarf 24 soatda</span><b>${Math.round(t.used)} L</b></div>`;
+    document.getElementById("fuelTable").innerHTML = T.map(t => `<tr><td class="mono">${plate(t)}</td><td>${t.driver}</td><td class="n">${Math.round(t.fuel)}</td><td class="n">${t.refuelL || "—"}</td><td class="n ${t.drainL ? "bad" : ""}">${t.drainL || "—"}</td><td class="n">${Math.round(t.used)}</td></tr>`).join("");
+  }
+  document.getElementById("fuelChips").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b) { fuelSel = +b.dataset.id; renderFuel(); } });
+
+  // alerts view
+  function renderBadge() { const n = alerts.filter(a => !a.read).length; const b = document.getElementById("alertBadge"); b.textContent = n; b.hidden = n === 0; }
+  function renderAlerts() {
+    const list = alerts.filter(a => alertFilter === "all" || a.sev === alertFilter);
+    document.getElementById("alertList").innerHTML = list.map(a => `
+      <li class="alert sev-${a.sev} ${a.read ? "read" : ""}">
+        <span class="stripe"></span>
+        <span class="time">${hhmm(a.m)}</span>
+        <div class="body"><div class="title">${a.title}</div><div class="desc"><span class="mono">${plate(a.t)}</span> · ${a.t.driver} · ${a.desc}</div></div>
+        <div class="act">${a.read ? `<span class="sub">Koʻrildi</span>` : `<button class="btn" data-read="${a.id}">Koʻrildi</button>`}</div>
+      </li>`).join("") || `<li class="sub">Bu turdagi ogohlantirish yoʻq.</li>`;
+  }
+  document.getElementById("alertChips").addEventListener("click", e => {
+    const b = e.target.closest("[data-f]");
+    if (b) { alertFilter = b.dataset.f; document.querySelectorAll("#alertChips [data-f]").forEach(c => c.setAttribute("aria-pressed", c === b)); renderAlerts(); }
+  });
+  document.getElementById("readAll").onclick = () => { alerts.forEach(a => a.read = true); renderBadge(); renderAlerts(); };
+  document.getElementById("alertList").addEventListener("click", e => { const b = e.target.closest("[data-read]"); if (b) { alerts.find(a => a.id === +b.dataset.read).read = true; renderBadge(); renderAlerts(); } });
+
+  // reports view
+  function renderReport() {
+    const max = Math.max(...T.map(t => t.todayKm));
+    const sorted = [...T].sort((a, b) => b.todayKm - a.todayKm);
+    document.getElementById("kmBars").innerHTML = sorted.map(t => `<div class="hbar"><span class="mono">${plate(t)}</span><span class="track"><i style="width:${(t.todayKm / max * 100).toFixed(1)}%"></i></span><span class="mono" style="text-align:right">${Math.round(t.todayKm)}</span></div>`).join("");
+    document.getElementById("reportTable").innerHTML = sorted.map(t => {
+      const idleH = t.id === 6 ? 2.4 : t.status === "move" ? 0.6 : 0.3;
+      const used = t.todayKm * (0.31 + (t.id % 4) * 0.012) + idleH * 2.4 + (t.id === 4 ? 0 : 0);
+      const per = used / t.todayKm * 100;
+      return `<tr><td class="mono">${plate(t)}</td><td>${t.driver}</td><td class="n">${Math.round(t.todayKm)}</td><td class="n">${(t.todayKm / 68).toFixed(1)}</td><td class="n">${idleH.toFixed(1)}</td><td class="n">${Math.round(used)}</td><td class="n ${per > 36.3 ? "bad" : ""}">${per.toFixed(1)}</td><td class="n ${t.viol ? "bad" : ""}">${t.viol}</td></tr>`;
+    }).join("");
+  }
+
+  // ---------- routing ----------
+  const VIEWS = ["xarita", "yoqilgi", "ogohlantirish", "hisobot"];
+  function go() {
+    const h = location.hash.slice(1); route_ = VIEWS.includes(h) ? h : "xarita";
+    VIEWS.forEach(v => document.getElementById("view-" + v).hidden = v !== route_);
+    document.querySelectorAll("nav.tabs a").forEach(a => a.dataset.view === route_ ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+    if (route_ === "yoqilgi") renderFuel();
+    if (route_ === "ogohlantirish") renderAlerts();
+    if (route_ === "hisobot") renderReport();
+  }
+  window.addEventListener("hashchange", go);
+
+  // ---------- simulation: 1 s = 1 min ----------
+  let tick = 0;
+  function step() {
+    tick++; simMin++;
+    T.forEach(t => {
+      if (t.status === "offline") return;
+      t.last = simMin;
+      if (t.status === "idle") { t.fuel -= 0.04; t.idleMin++; if (t.idleMin % 30 === 0) addAlert("warn", t, `Uzoq salt ishlash: ${t.idleMin} daqiqa`, "Dvigatel ishlab turibdi, tezlik 0."); return; }
+      if (!t.r) return;
+      if (t.pause > 0) { t.pause--; t.speed = 0; if (t.pause === 0) { t.status = "move"; t.dir = -t.dir; t.speed = 50; } return; }
+      t.speed = Math.max(40, Math.min(99, t.speed + (Math.sin(tick / 6 + t.id) * 4 + (((tick * 13 + t.id * 7) % 11) - 5) * 0.8)));
+      const d = t.speed / 60; t.s += d * t.dir; t.todayKm += d; t.odo += d; t.fuel -= d * 0.33;
+      if (t.speed > 90 && (!t.lastViol || tick - t.lastViol > 25)) { t.lastViol = tick; t.viol++; addAlert("warn", t, `Tezlik oshirildi: ${Math.round(t.speed)} km/soat`, `Chegara 90 km/soat. ${nearest(t.lon, t.lat)}.`); }
+      if (t.s >= t.r.len || t.s <= 0) {
+        t.s = Math.max(0, Math.min(t.r.len, t.s)); t.status = "stop"; t.speed = 0; t.pause = 20;
+        addAlert("info", t, `Manzilga yetib keldi: ${C[t.dir > 0 ? t.r.keys.at(-1) : t.r.keys[0]][2]}`, "Yuk tushirish uchun toʻxtadi.");
+      }
+      const p = where(t); const xy = P(p.lon, p.lat); t.trail.push(xy); if (t.trail.length > 400) t.trail.shift();
+      if (t.fuel / t.tank < 0.15 && !t.lowFuel) { t.lowFuel = true; addAlert("warn", t, "Yoqilgʻi kam: " + Math.round(t.fuel) + " L", "Eng yaqin AYOQSHga yoʻnaltiring."); }
+    });
+    if (tick % 30 === 0) T.forEach(t => { if (t.status !== "offline") { t.hist.shift(); t.hist.forEach(p => p.i--); t.hist.push({ i: 48, v: t.fuel }); if (t.refuelAt != null) t.refuelAt--; if (t.drainAt != null) t.drainAt--; if (t.refuelAt < 0) t.refuelAt = null; if (t.drainAt < 0) t.drainAt = null; } });
+    document.getElementById("clock").textContent = "27.10.2026 " + hhmm(simMin);
+    drawTrucks();
+    if (route_ === "xarita") { renderKpis(); renderList(); renderDetail(); }
+    else if (route_ === "hisobot" && tick % 5 === 0) renderReport();
+    else if (route_ === "yoqilgi" && tick % 30 === 0) renderFuel();
+  }
+
+  // seed trails with some past movement for moving trucks
+  T.forEach(t => { if (!t.r) return; for (let k = 60; k > 0; k--) { const p = posAt(t.r, t.s - k * 1.15 * t.dir, t.dir); t.trail.push(P(p.lon, p.lat)); } });
+
+  drawTrucks(); renderKpis(); renderList(); renderDetail(); renderBadge(); go();
+  setInterval(step, 1000);
+})();
+</script>
+</body>
+</html>
