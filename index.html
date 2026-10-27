@@ -158,6 +158,44 @@ tr:last-child td { border-bottom: 0; }
 .hbars { display: grid; gap: 8px; padding: 14px; }
 .foot { font-size: 12.5px; color: var(--muted); }
 
+/* login + admin */
+.login { min-height: 100vh; display: grid; place-items: center; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.login-card { width: 100%; max-width: 460px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px; display: grid; gap: 18px; }
+.login h1 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+.acct-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.acct { text-align: left; border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; padding: 12px; display: grid; gap: 4px; align-content: start; }
+.acct:hover, .acct[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.acct b { font-size: 14px; }
+.acct .mono { font-size: 12px; color: var(--accent); }
+.acct .sub { font-size: 12px; }
+.field { display: grid; gap: 5px; }
+.field > label, .field > .lab { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.input { width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 7px; padding: 8px 10px; font: inherit; min-width: 0; }
+.input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.err { color: var(--crit); font-size: 13px; margin: 0; }
+.form { padding: 16px; display: grid; gap: 12px; align-content: start; }
+.form h3 { margin: 0; font-size: 15px; }
+.row2 { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px; }
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+.user { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
+.user .role { display: block; color: var(--muted); font-size: 11.5px; font-weight: 400; }
+.btn.sm { padding: 4px 10px; font-size: 12.5px; }
+.btn.danger { border-color: var(--crit); color: var(--crit); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.check { display: flex; align-items: center; gap: 8px; }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--surface); padding: 10px 14px; border-radius: 8px; z-index: 30; font-weight: 500; }
+.rep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.rep-card { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.rep-card:hover { border-color: var(--accent); }
+.rep-card[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.rep-card b { font-size: 14.5px; }
+.rep-card span { font-size: 12.5px; color: var(--muted); }
+.rep-card .sheets { font-family: var(--font-data); font-size: 11.5px; }
+tr.total td { font-weight: 600; background: var(--surface-2); }
+@media (max-width: 1000px) { .admin-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) { .acct-row { grid-template-columns: 1fr; } .login-card { padding: 20px; } }
+
 @media (max-width: 1180px) {
   .monitor { grid-template-columns: 260px minmax(0, 1fr); }
   .monitor .detail { grid-column: 1 / -1; }
@@ -177,7 +215,30 @@ tr:last-child td { border-bottom: 0; }
 </head>
 <body>
 
-<header class="topbar">
+<section class="login" id="login" hidden>
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Z" fill="var(--surface)"/><circle cx="12" cy="9" r="2.6" fill="var(--ink)"/></svg></span>
+      Yuk Nazorat <span class="demo-pill">Demo</span>
+    </div>
+    <div style="display:grid; gap:4px">
+      <h1>Tizimga kirish</h1>
+      <p class="note">Demo hisoblardan birini tanlang yoki login va parolni kiriting.</p>
+    </div>
+    <div class="acct-row">
+      <button class="acct" type="button" data-login="rahbar"><b>Logistika rahbari</b><span class="mono">rahbar / demo123</span><span class="sub">Xarita, yoqilgʻi, ogohlantirishlar, hisobotlar</span></button>
+      <button class="acct" type="button" data-login="admin"><b>Administrator</b><span class="mono">admin / demo123</span><span class="sub">Mashinalar, GPS qurilmalar, foydalanuvchilar, sozlamalar</span></button>
+    </div>
+    <form class="form" id="loginForm" style="padding:0" novalidate>
+      <div class="field"><label for="lgUser">Login</label><input class="input" id="lgUser" autocomplete="username" autocapitalize="off"></div>
+      <div class="field"><label for="lgPass">Parol</label><input class="input" id="lgPass" type="password" autocomplete="current-password"></div>
+      <p class="err" id="lgErr" hidden></p>
+      <button class="btn primary" type="submit">Kirish</button>
+    </form>
+  </div>
+</section>
+
+<header class="topbar" hidden>
   <div class="topbar-in">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Z" fill="var(--surface)"/><circle cx="12" cy="9" r="2.6" fill="var(--ink)"/></svg></span>
@@ -188,12 +249,17 @@ tr:last-child td { border-bottom: 0; }
       <a href="#yoqilgi" data-view="yoqilgi">Yoqilgʻi</a>
       <a href="#ogohlantirish" data-view="ogohlantirish">Ogohlantirishlar <span class="badge" id="alertBadge">0</span></a>
       <a href="#hisobot" data-view="hisobot">Hisobotlar</a>
+      <a href="#mashinalar" data-view="mashinalar">Mashinalar</a>
+      <a href="#qurilmalar" data-view="qurilmalar">GPS qurilmalar</a>
+      <a href="#foydalanuvchilar" data-view="foydalanuvchilar">Foydalanuvchilar</a>
+      <a href="#sozlamalar" data-view="sozlamalar">Sozlamalar</a>
     </nav>
     <div class="clock"><span class="live-dot" aria-hidden="true"></span><span id="clock">27.10.2026 08:40</span></div>
+    <div class="user"><span id="userName"></span><button class="btn sm" id="logout" type="button">Chiqish</button></div>
   </div>
 </header>
 
-<main>
+<main hidden>
   <!-- MONITORING -->
   <section class="view" id="view-xarita">
     <div class="kpis" id="kpis"></div>
@@ -260,22 +326,103 @@ tr:last-child td { border-bottom: 0; }
   <!-- REPORTS -->
   <section class="view" id="view-hisobot" hidden>
     <div class="toolbar">
-      <div><h2>Kunlik hisobot</h2><div class="sub">27.10.2026, 00:00 dan hozirgacha. Haqiqiy tizimda Excel va PDF formatida yuklab olinadi.</div></div>
+      <div><h2>Hisobotlar</h2><div class="sub" id="repPeriodText"></div></div>
+      <div class="chips" id="repPeriod">
+        <button class="chip" data-p="1" aria-pressed="false">Bugun</button>
+        <button class="chip" data-p="7" aria-pressed="true">7 kun</button>
+        <button class="chip" data-p="30" aria-pressed="false">30 kun</button>
+      </div>
     </div>
+    <div class="rep-grid" id="repCards"></div>
     <div class="panel">
-      <div class="panel-head"><h3>Bugungi probeg, km</h3></div>
-      <div class="hbars" id="kmBars"></div>
+      <div class="panel-head" style="flex-wrap:wrap">
+        <div><h3 id="repTitle"></h3><div class="sub" id="repSheets"></div></div>
+        <button class="btn primary" id="repXlsx" type="button">Excelga yuklab olish</button>
+      </div>
+      <div class="tbl-wrap"><table id="repTable"></table></div>
     </div>
-    <div class="panel tbl-wrap">
-      <table>
-        <thead><tr><th>Mashina</th><th>Haydovchi</th><th class="n">Probeg, km</th><th class="n">Harakatda, soat</th><th class="n">Salt, soat</th><th class="n">Sarf, L</th><th class="n">L/100 km</th><th class="n">Tezlik buzish</th></tr></thead>
-        <tbody id="reportTable"></tbody>
-      </table>
+    <p class="foot">Yoqilgʻi meʼyori 33 L/100 km. Excel faylda har bir hisobot bir nechta varaqdan iborat: umumiy jadval va batafsil roʻyxat. Claude ichidagi koʻrinishda fayl yuklab olinmaydi, Vercel saytida ishlaydi.</p>
+  </section>
+
+  <!-- ADMIN: TRUCKS -->
+  <section class="view" id="view-mashinalar" hidden>
+    <div class="toolbar"><div><h2>Mashinalar</h2><div class="sub">Parkdagi mashinalar va ularga oʻrnatilgan GPS qurilmalar</div></div></div>
+    <div class="admin-grid">
+      <div class="panel tbl-wrap"><table><thead><tr><th>Davlat raqami</th><th>Model</th><th>Haydovchi</th><th class="n">Bak, L</th><th>GPS qurilma</th><th>Holat</th><th></th></tr></thead><tbody id="admTrucks"></tbody></table></div>
+      <form class="panel form" id="formTruck" novalidate>
+        <h3>Mashina qoʻshish</h3>
+        <div class="field"><label for="ftNum">Davlat raqami</label><div class="row2"><select class="input" id="ftReg" aria-label="Hudud kodi"></select><input class="input mono" id="ftNum" placeholder="123 ABC" maxlength="7" autocapitalize="characters"></div></div>
+        <div class="field"><label for="ftModel">Marka va model</label><input class="input" id="ftModel" placeholder="MAN TGX 18.440"></div>
+        <div class="field"><label for="ftDriver">Haydovchi</label><input class="input" id="ftDriver" placeholder="Ism Familiya"></div>
+        <div class="field"><label for="ftTank">Bak hajmi, L</label><input class="input" id="ftTank" type="number" min="50" max="1500" value="400"></div>
+        <div class="field"><label for="ftDev">GPS qurilma</label><select class="input" id="ftDev"></select></div>
+        <p class="err" id="ftErr" hidden></p>
+        <button class="btn primary" type="submit">Qoʻshish</button>
+        <p class="note">Yangi mashina xaritada Toshkent bazasida koʻrinadi.</p>
+      </form>
     </div>
-    <p class="foot">Me’yor: 33 L/100 km. Undan 10% dan ortiq sarf qizil rangda koʻrsatiladi.</p>
+  </section>
+
+  <!-- ADMIN: DEVICES -->
+  <section class="view" id="view-qurilmalar" hidden>
+    <div class="toolbar"><div><h2>GPS qurilmalar</h2><div class="sub">Treker, SIM karta va maʼlumot uzatish holati</div></div></div>
+    <div class="admin-grid">
+      <div class="panel tbl-wrap"><table><thead><tr><th>IMEI</th><th>Model</th><th>Protokol</th><th>SIM karta</th><th>Mashina</th><th>Oxirgi paket</th><th>Holat</th><th></th></tr></thead><tbody id="admDevices"></tbody></table></div>
+      <form class="panel form" id="formDevice" novalidate>
+        <h3>Qurilma qoʻshish</h3>
+        <div class="field"><label for="fdImei">IMEI (15 raqam)</label><input class="input mono" id="fdImei" inputmode="numeric" maxlength="15" placeholder="352093081234567"></div>
+        <div class="field"><label for="fdModel">Model</label><select class="input" id="fdModel"></select></div>
+        <div class="field"><label for="fdSim">SIM karta raqami</label><input class="input mono" id="fdSim" placeholder="+998 90 123 45 67"></div>
+        <p class="err" id="fdErr" hidden></p>
+        <button class="btn primary" type="submit">Qoʻshish</button>
+        <p class="note">Qurilmani sozlashda server manzili va portni yozing. Teltonika uchun port 5027, Galileosky uchun 5028 (misol).</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ADMIN: USERS -->
+  <section class="view" id="view-foydalanuvchilar" hidden>
+    <div class="toolbar"><div><h2>Foydalanuvchilar</h2><div class="sub">Kim tizimga kira oladi va qaysi rolda</div></div></div>
+    <div class="admin-grid">
+      <div class="panel tbl-wrap"><table><thead><tr><th>Ism</th><th>Login</th><th>Rol</th><th>Telefon</th><th>Telegram</th><th>Holat</th><th></th></tr></thead><tbody id="admUsers"></tbody></table></div>
+      <form class="panel form" id="formUser" novalidate>
+        <h3>Foydalanuvchi qoʻshish</h3>
+        <div class="field"><label for="fuName">Ism familiya</label><input class="input" id="fuName"></div>
+        <div class="field"><label for="fuLogin">Login</label><input class="input mono" id="fuLogin" autocapitalize="off" placeholder="masalan: nodira"></div>
+        <div class="field"><label for="fuRole">Rol</label><select class="input" id="fuRole"></select></div>
+        <div class="field"><label for="fuPhone">Telefon</label><input class="input mono" id="fuPhone" placeholder="+998 90 123 45 67"></div>
+        <div class="field"><label for="fuTg">Telegram</label><input class="input" id="fuTg" placeholder="@username"></div>
+        <p class="err" id="fuErr" hidden></p>
+        <button class="btn primary" type="submit">Qoʻshish</button>
+        <p class="note">Demo’da barcha foydalanuvchilar paroli demo123. Hozircha faqat Logistika rahbari va Administrator ekranlari tayyor.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ADMIN: SETTINGS -->
+  <section class="view" id="view-sozlamalar" hidden>
+    <div class="toolbar"><div><h2>Sozlamalar</h2><div class="sub">Ogohlantirish chegaralari va bildirishnoma kanallari</div></div></div>
+    <form class="panel form" id="formSettings" style="max-width:560px" novalidate>
+      <div class="field"><label for="fsSpeed">Tezlik chegarasi, km/soat</label><input class="input" id="fsSpeed" type="number" min="40" max="130"></div>
+      <div class="field"><label for="fsDrain">Yoqilgʻi toʻkish deb hisoblash, L dan ortiq</label><input class="input" id="fsDrain" type="number" min="5" max="200"></div>
+      <div class="field"><label for="fsIdle">Uzoq salt ishlash, daqiqadan ortiq</label><input class="input" id="fsIdle" type="number" min="5" max="120"></div>
+      <div class="field"><label for="fsInt">Harakatda nuqta yuborish oraligʻi</label><select class="input" id="fsInt"><option value="10">10 soniya</option><option value="30">30 soniya</option><option value="60">60 soniya</option></select></div>
+      <div class="field"><label for="fsTg">Telegram guruh ID</label><input class="input mono" id="fsTg" placeholder="-1001234567890"></div>
+      <div class="field"><span class="lab">Bildirishnoma kanallari</span>
+        <label class="check"><input type="checkbox" id="fsChWeb"> Web-panelda ovozli signal</label>
+        <label class="check"><input type="checkbox" id="fsChTg"> Telegram bot</label>
+        <label class="check"><input type="checkbox" id="fsChSms"> SMS</label>
+        <label class="check"><input type="checkbox" id="fsChMail"> E-mail</label>
+      </div>
+      <p class="err" id="fsErr" hidden></p>
+      <div class="btn-row"><button class="btn primary" type="submit">Saqlash</button><button class="btn" type="button" id="fsReset">Demo maʼlumotlarni tiklash</button></div>
+      <p class="note">Demo’da oʻzgarishlar faqat shu brauzerda saqlanadi.</p>
+    </form>
   </section>
 </main>
+<div class="toast" id="toast" role="status" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -322,6 +469,44 @@ tr:last-child td { border-bottom: 0; }
   const plate = t => t.reg + " " + t.num;
   let simMin = 8 * 60 + 40; // 08:40
   let selected = 1, showTrail = true, fuelSel = 4, alertFilter = "all", route_ = "xarita", query = "";
+
+  // ---------- roles + admin data (demo: kept in this browser only) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("yn:" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("yn:" + k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem("yn:" + k); } catch (e) {} }
+  };
+  const ROLES = { rahbar: "Logistika rahbari", dispetcher: "Dispetcher", haydovchi: "Haydovchi", buxgalter: "Buxgalter / direktor", admin: "Administrator" };
+  const ROLE_VIEWS = { rahbar: ["xarita", "yoqilgi", "ogohlantirish", "hisobot"], admin: ["xarita", "mashinalar", "qurilmalar", "foydalanuvchilar", "sozlamalar"] };
+  const DEMO_PASS = "demo123";
+  const REGS = ["01", "10", "20", "25", "30", "40", "50", "60", "70", "75", "80", "85", "90", "95"];
+  const MODELS = { "Teltonika FMC130": "Codec 8E", "Teltonika FMC150": "Codec 8E", "Teltonika FMC650": "Codec 8E", "Teltonika FMB920": "Codec 8", "Galileosky 10 Plus": "Galileosky" };
+  let users = store.get("users", [
+    { id: 1, name: "Dilnoza Ergasheva", login: "rahbar", role: "rahbar", phone: "+998 90 111 22 33", tg: "@dilnoza_logist", active: true },
+    { id: 2, name: "Sardor Xolmatov", login: "admin", role: "admin", phone: "+998 93 444 55 66", tg: "@sardor_admin", active: true },
+    { id: 3, name: "Nodira Qosimova", login: "nodira", role: "dispetcher", phone: "+998 97 777 88 99", tg: "@nodira_disp", active: true },
+    { id: 4, name: "Farhod Mirzayev", login: "farhod", role: "buxgalter", phone: "+998 99 123 45 67", tg: "", active: false }
+  ]);
+  const DEFAULT_DEVICES = [
+    { imei: "352093081245017", model: "Teltonika FMC650", sim: "+998 95 200 01 01", fw: "03.27.10" },
+    { imei: "352093081318024", model: "Teltonika FMC130", sim: "+998 95 200 01 02", fw: "03.27.10" },
+    { imei: "352093081112039", model: "Teltonika FMC130", sim: "+998 95 200 01 03", fw: "03.27.07" },
+    { imei: "352093081554046", model: "Teltonika FMC130", sim: "+998 95 200 01 04", fw: "03.27.10" },
+    { imei: "352093081907051", model: "Teltonika FMC150", sim: "+998 95 200 01 05", fw: "03.27.10" },
+    { imei: "868204051223068", model: "Galileosky 10 Plus", sim: "+998 95 200 01 06", fw: "0219" },
+    { imei: "352093081681073", model: "Teltonika FMC130", sim: "+998 95 200 01 07", fw: "03.25.14" },
+    { imei: "352093081436082", model: "Teltonika FMC130", sim: "+998 95 200 01 08", fw: "03.27.10" },
+    { imei: "352093081990095", model: "Teltonika FMC130", sim: "+998 95 200 01 09", fw: "03.27.10" },
+    { imei: "352093081990103", model: "Teltonika FMB920", sim: "+998 95 200 01 10", fw: "03.27.10" }
+  ];
+  let devices = store.get("devices", DEFAULT_DEVICES);
+  let S = Object.assign({ speedLimit: 90, drainL: 15, idleMin: 15, interval: 30, tgChat: "-1001845229011", ch: { web: true, tg: true, sms: false, email: true } }, store.get("settings", {}));
+  const savedTrucks = store.get("trucks", { extra: [], removed: [], imei: {} });
+  let removedIds = savedTrucks.removed || [];
+  T.forEach((t, i) => { t.imei = (savedTrucks.imei && t.id in savedTrucks.imei) ? savedTrucks.imei[t.id] : DEFAULT_DEVICES[i].imei; });
+  for (let i = T.length - 1; i >= 0; i--) if (removedIds.includes(T[i].id)) T.splice(i, 1);
+  if (!T.some(t => t.id === selected)) selected = T[0].id;
+  if (!T.some(t => t.id === fuelSel)) fuelSel = T[0].id;
   const hhmm = m => { m = ((Math.round(m) % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
 
   // fuel history: 49 points, every 30 min, last = now
@@ -335,8 +520,8 @@ tr:last-child td { border-bottom: 0; }
     7: { now: 210, use: 8.5, cutoff: 44 },
     8: { now: 210, refuel: [36, 250], use: 7 }
   };
-  T.forEach(t => {
-    const c = FUELCFG[t.id]; const h = new Array(49); let v = c.now;
+  function initTruck(t) {
+    const c = FUELCFG[t.id] || { now: Math.round(t.tank * 0.6), use: 0 }; const h = new Array(49); let v = c.now;
     t.refuelL = 0; t.drainL = 0; t.used = 0; h[48] = v;
     for (let i = 48; i >= 1; i--) {
       const hr = (((simMin - (48 - i) * 30) % 1440) + 1440) % 1440 / 60;
@@ -354,7 +539,8 @@ tr:last-child td { border-bottom: 0; }
     t.odo = 180000 + t.id * 53117 % 400000;
     t.last = t.status === "offline" ? simMin - 122 : simMin;
     t.idleMin = t.status === "idle" ? 25 : 0;
-  });
+  }
+  T.forEach(initTruck);
   T.forEach(t => { if (t.status === "offline") { t.speed = 0; } });
 
   // ---------- alerts ----------
@@ -392,7 +578,7 @@ tr:last-child td { border-bottom: 0; }
   drawBase();
   const trailPath = el("path", { fill: "none", stroke: "var(--accent)", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round", "stroke-dasharray": "1 0" }, svg);
   const marks = {};
-  T.forEach(t => {
+  function addMarker(t) {
     const g = el("g", { class: "truck-mark", tabindex: 0, role: "button", "aria-label": plate(t) }, svg);
     const ring = el("circle", { r: 16, fill: "none", stroke: "var(--accent)", "stroke-width": 3, opacity: 0 }, g);
     const body = el("circle", { r: 10, stroke: "var(--surface)", "stroke-width": 2.5 }, g);
@@ -401,7 +587,8 @@ tr:last-child td { border-bottom: 0; }
     g.addEventListener("click", () => select(t.id));
     g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(t.id); } });
     marks[t.id] = { g, ring, body, arrow, lab };
-  });
+  }
+  T.forEach(addMarker);
   const STATUS = { move: ["Harakatda", "var(--ok)"], idle: ["Salt ishlayapti", "var(--warn)"], stop: ["Toʻxtagan", "var(--off)"], offline: ["Aloqa yoʻq", "var(--crit)"] };
   function where(t) {
     if (t.r) { const p = posAt(t.r, t.s, t.dir); return p; }
@@ -540,28 +727,336 @@ tr:last-child td { border-bottom: 0; }
   document.getElementById("readAll").onclick = () => { alerts.forEach(a => a.read = true); renderBadge(); renderAlerts(); };
   document.getElementById("alertList").addEventListener("click", e => { const b = e.target.closest("[data-read]"); if (b) { alerts.find(a => a.id === +b.dataset.read).read = true; renderBadge(); renderAlerts(); } });
 
-  // reports view
+  // ---------- report data: 30 days of deterministic history + today live ----------
+  const rnd = (a, b, c) => { const x = Math.sin(a * 127.1 + b * 311.7 + c * 74.7) * 43758.5453; return x - Math.floor(x); };
+  const DAY0 = Date.UTC(2026, 9, 27);
+  const dstr = d => { const x = new Date(DAY0 - d * 864e5); return String(x.getUTCDate()).padStart(2, "0") + "." + String(x.getUTCMonth() + 1).padStart(2, "0") + "." + x.getUTCFullYear(); };
+  const CITYN = Object.keys(C).filter(k => C[k][2]).map(k => C[k][2]);
+  const GEOZ = ["Toshkent, markaziy ombor", "Samarqand, mijoz ombori", "Buxoro, neftbaza", "Guliston AYOQSH", "Andijon, zavod", "Qarshi, avtoturargoh", "Gʻishtkoʻprik chegara posti", "Termiz, port"];
+  const DRAINS = { 4: [[0, 220, 65, "Buxoro – Urganch yoʻli, 118-km"]], 7: [[6, 1335, 40, "Qarshi, avtoturargoh"]], 2: [[12, 80, 25, "Qoʻqon, tunash joyi"]] };
+  const NORM = 33;
+  const r1 = v => Math.round(v * 10) / 10;
+  const pick = (arr, x) => arr[Math.min(arr.length - 1, Math.floor(x * arr.length))];
+  function history(t, N) {
+    const rate = 0.30 + (t.id % 5) * 0.012 + (t.id === 4 ? 0.03 : 0);
+    const local = t.id === 5 || t.id === 6 || !!t.extra;
+    let lvl = t.tank * (0.55 + rnd(t.id, 7, 3) * 0.3);
+    const days = [];
+    for (let d = 29; d >= 0; d--) {
+      const live = d === 0;
+      const working = live ? t.todayKm > 0 : rnd(t.id, d, 1) > 0.14;
+      const km = live ? t.todayKm : working ? (local ? 50 + rnd(t.id, d, 2) * 110 : 210 + rnd(t.id, d, 2) * 280) : 0;
+      const moveH = km / (56 + rnd(t.id, d, 3) * 12);
+      const idleH = working ? (t.id === 6 ? 1.5 : 0.2) + rnd(t.id, d, 4) * 1.4 : 0;
+      const nStops = working ? 2 + Math.floor(rnd(t.id, d, 5) * 6) : 0;
+      const maxSpd = working ? Math.round(76 + rnd(t.id, d, 6) * 23) : 0;
+      const viol = live ? t.viol : maxSpd > S.speedLimit ? 1 + Math.floor(rnd(t.id, d, 7) * 3) : 0;
+      const startH = 5.5 + rnd(t.id, d, 8) * 2;
+      const endH = Math.min(live ? simMin / 60 : 23.5, startH + moveH + idleH + nStops * 0.45);
+      const ok = m => !live || m <= simMin;
+      const used = km * rate + idleH * 2.4;
+      const ev = { refuel: [], drain: [], stops: [], speed: [], geo: [] };
+      const lvlStart = lvl;
+      if (working && lvl - used < t.tank * 0.25) {
+        const before = Math.max(20, lvl - used * 0.5); const amt = Math.round((t.tank * 0.95 - before) / 10) * 10;
+        ev.refuel.push({ time: hhmm(live ? startH * 60 + rnd(t.id, d, 9) * (simMin - startH * 60) : 600 + rnd(t.id, d, 9) * 360), L: amt, before: r1(before), after: r1(before + amt), place: pick(CITYN, rnd(t.id, d, 10)) + " AYOQSH" });
+      }
+      (DRAINS[t.id] || []).filter(x => x[0] === d).forEach(x => ev.drain.push({ time: hhmm(x[1]), L: x[2], place: x[3] }));
+      const refuel = ev.refuel.reduce((a, x) => a + x.L, 0), drain = ev.drain.reduce((a, x) => a + x.L, 0);
+      lvl = Math.max(15, Math.min(t.tank, lvl + refuel - drain - used));
+      for (let i = 0; i < nStops; i++) {
+        const st = startH + (i + 1) * (endH - startH) / (nStops + 1), dur = Math.round(10 + rnd(t.id, d, 20 + i) * 70);
+        if (ok(st * 60 + dur)) ev.stops.push({ start: hhmm(st * 60), end: hhmm(st * 60 + dur), dur, type: rnd(t.id, d, 30 + i) > 0.65 ? "Yuk ortish / tushirish" : "Dam olish", place: pick(CITYN, rnd(t.id, d, 40 + i)) });
+      }
+      for (let i = 0; i < viol; i++) {
+        const spd = Math.round(S.speedLimit + 1 + rnd(t.id, d, 50 + i) * 9);
+        ev.speed.push({ time: hhmm((startH + rnd(t.id, d, 60 + i) * Math.max(0.2, endH - startH)) * 60), speed: spd, dur: Math.round(20 + rnd(t.id, d, 70 + i) * 160), place: pick(CITYN, rnd(t.id, d, 80 + i)) + " yoʻli" });
+      }
+      if (working) {
+        const nGeo = 1 + Math.floor(rnd(t.id, d, 90) * 3);
+        for (let i = 0; i < nGeo; i++) {
+          const inM = (startH + (i + 0.3) * (endH - startH) / nGeo) * 60, dur = Math.round(15 + rnd(t.id, d, 91 + i) * 110);
+          if (ok(inM + dur)) ev.geo.push({ zone: pick(GEOZ, rnd(t.id, d, 95 + i)), in: hhmm(inM), out: hhmm(inM + dur), dur });
+        }
+      }
+      const brake = working ? Math.floor(rnd(t.id, d, 11) * 3) : 0, accel = working ? Math.floor(rnd(t.id, d, 12) * 3) : 0;
+      days.push({ d, date: dstr(d), working, km: r1(km), moveH: r1(moveH), idleH: r1(idleH), stops: nStops, maxSpd, avgSpd: moveH ? Math.round(km / moveH) : 0, viol, brake, accel,
+        start: working ? hhmm(startH * 60) : "—", end: working ? hhmm(endH * 60) : "—", lvlStart: r1(lvlStart), refuel, drain, used: r1(used), lvlEnd: r1(lvl), ev });
+    }
+    let odo = t.odo;
+    for (let i = days.length - 1; i >= 0; i--) { days[i].odoEnd = Math.round(odo); days[i].odoStart = Math.round(odo - days[i].km); odo -= days[i].km; }
+    return days.slice(-N).reverse();
+  }
+  const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+  const pct = (a, b) => b ? r1((a - b) / b * 100) : 0;
+  function eachDay(data, fn) { const rows = []; for (let d = 0; d < data[0].days.length; d++) data.forEach(({ t, days }) => fn(rows, t, days[d])); return rows; }
+  function eachEvent(data, key, fn) { const rows = []; for (let d = 0; d < data[0].days.length; d++) data.forEach(({ t, days }) => days[d].ev[key].forEach(e => rows.push(fn(t, days[d], e)))); return rows; }
+
+  const REPORTS = [
+    { id: "probeg", file: "Probeg_hisoboti", name: "Probeg (km)", desc: "Masofa, harakat va salt vaqti, toʻxtashlar, odometr.",
+      sheets: data => [
+        { name: "Umumiy", header: ["№", "Davlat raqami", "Model", "Haydovchi", "Probeg, km", "Ish kunlari", "Harakatda, soat", "Salt, soat", "Toʻxtashlar", "Oʻrtacha tezlik, km/soat", "Maks. tezlik, km/soat", "Odometr boshi, km", "Odometr oxiri, km"],
+          rows: data.map(({ t, days }, i) => { const mh = sum(days, x => x.moveH), k = sum(days, x => x.km); return [i + 1, plate(t), t.model, t.driver, r1(k), days.filter(x => x.working).length, r1(mh), r1(sum(days, x => x.idleH)), sum(days, x => x.stops), mh ? Math.round(k / mh) : 0, Math.max(...days.map(x => x.maxSpd)), days.at(-1).odoStart, days[0].odoEnd]; }),
+          total: d => ["", "Jami", "", "", r1(sum(d, r => r[4])), "", r1(sum(d, r => r[6])), r1(sum(d, r => r[7])), sum(d, r => r[8]), "", "", "", ""] },
+        { name: "Kunlik", header: ["Sana", "Davlat raqami", "Haydovchi", "Ish boshlandi", "Ish tugadi", "Probeg, km", "Harakatda, soat", "Salt, soat", "Toʻxtashlar", "Oʻrtacha tezlik", "Maks. tezlik", "Odometr boshi", "Odometr oxiri"],
+          rows: eachDay(data, (rows, t, x) => rows.push([x.date, plate(t), t.driver, x.start, x.end, x.km, x.moveH, x.idleH, x.stops, x.avgSpd, x.maxSpd, x.odoStart, x.odoEnd])) }
+      ] },
+    { id: "yoqilgi", file: "Yoqilgi_hisoboti", name: "Yoqilgʻi", desc: "Quyish, toʻkish, sarf va meʼyordan farq.",
+      sheets: data => [
+        { name: "Umumiy", header: ["№", "Davlat raqami", "Model", "Haydovchi", "Bak, L", "Davr boshida, L", "Quyildi, L", "Toʻkildi, L", "Sarf, L", "Davr oxirida, L", "Probeg, km", "Haqiqiy, L/100 km", "Meʼyor, L/100 km", "Meʼyor boʻyicha, L", "Farq, L", "Farq, %"],
+          rows: data.map(({ t, days }, i) => { const k = sum(days, x => x.km), u = sum(days, x => x.used), n = k * NORM / 100; return [i + 1, plate(t), t.model, t.driver, t.tank, days.at(-1).lvlStart, sum(days, x => x.refuel), sum(days, x => x.drain), r1(u), days[0].lvlEnd, r1(k), k ? r1(u / k * 100) : 0, NORM, r1(n), r1(u - n), pct(u, n)]; }),
+          total: d => ["", "Jami", "", "", "", "", sum(d, r => r[6]), sum(d, r => r[7]), r1(sum(d, r => r[8])), "", r1(sum(d, r => r[10])), "", "", r1(sum(d, r => r[13])), r1(sum(d, r => r[14])), ""],
+          bad: (r, i) => (i === 15 && r[15] > 10) || (i === 7 && r[7] > 0) },
+        { name: "Kunlik", header: ["Sana", "Davlat raqami", "Haydovchi", "Kun boshida, L", "Quyildi, L", "Toʻkildi, L", "Sarf, L", "Kun oxirida, L", "Probeg, km", "L/100 km"],
+          rows: eachDay(data, (rows, t, x) => rows.push([x.date, plate(t), t.driver, x.lvlStart, x.refuel, x.drain, x.used, x.lvlEnd, x.km, x.km ? r1(x.used / x.km * 100) : 0])) },
+        { name: "Quyishlar", header: ["Sana", "Vaqt", "Davlat raqami", "Haydovchi", "Quyildi, L", "Oldin, L", "Keyin, L", "Joy"],
+          rows: eachEvent(data, "refuel", (t, x, e) => [x.date, e.time, plate(t), t.driver, e.L, e.before, e.after, e.place]) },
+        { name: "Toʻkishlar", header: ["Sana", "Vaqt", "Davlat raqami", "Haydovchi", "Toʻkildi, L", "Joy", "Holat"],
+          rows: eachEvent(data, "drain", (t, x, e) => [x.date, e.time, plate(t), t.driver, e.L, e.place, "Tekshirilmoqda"]) }
+      ] },
+    { id: "tezlik", file: "Tezlik_hisoboti", name: "Tezlik", desc: "Tezlik chegarasini buzishlar: qachon, qayerda, qancha.",
+      sheets: data => [
+        { name: "Umumiy", header: ["№", "Davlat raqami", "Haydovchi", "Probeg, km", "Buzishlar soni", "100 km ga buzish", "Maks. tezlik, km/soat", "Oʻrtacha tezlik, km/soat", "Eng uzun buzish, s"],
+          rows: data.map(({ t, days }, i) => { const k = sum(days, x => x.km), v = sum(days, x => x.ev.speed.length), mh = sum(days, x => x.moveH); const durs = days.flatMap(x => x.ev.speed.map(e => e.dur)); return [i + 1, plate(t), t.driver, r1(k), v, k ? r1(v / k * 100) : 0, Math.max(0, ...days.map(x => x.ev.speed.length ? Math.max(...x.ev.speed.map(e => e.speed)) : x.maxSpd)), mh ? Math.round(k / mh) : 0, durs.length ? Math.max(...durs) : 0]; }),
+          total: d => ["", "Jami", "", r1(sum(d, r => r[3])), sum(d, r => r[4]), "", "", "", ""],
+          bad: (r, i) => i === 4 && r[4] > 0 },
+        { name: "Buzishlar", header: ["Sana", "Vaqt", "Davlat raqami", "Haydovchi", "Tezlik, km/soat", "Chegara, km/soat", "Oshish, km/soat", "Davomiyligi, s", "Joy"],
+          rows: eachEvent(data, "speed", (t, x, e) => [x.date, e.time, plate(t), t.driver, e.speed, S.speedLimit, e.speed - S.speedLimit, e.dur, e.place]) }
+      ] },
+    { id: "toxtash", file: "Toxtashlar_hisoboti", name: "Toʻxtashlar", desc: "Har bir toʻxtash joyi, vaqti, davomiyligi va salt ishlash.",
+      sheets: data => [
+        { name: "Umumiy", header: ["№", "Davlat raqami", "Haydovchi", "Toʻxtashlar soni", "Jami toʻxtash, soat", "Oʻrtacha, daqiqa", "Eng uzun, daqiqa", "Salt ishlash, soat"],
+          rows: data.map(({ t, days }, i) => { const durs = days.flatMap(x => x.ev.stops.map(e => e.dur)); return [i + 1, plate(t), t.driver, durs.length, r1(sum(durs, x => x) / 60), durs.length ? Math.round(sum(durs, x => x) / durs.length) : 0, durs.length ? Math.max(...durs) : 0, r1(sum(days, x => x.idleH))]; }),
+          total: d => ["", "Jami", "", sum(d, r => r[3]), r1(sum(d, r => r[4])), "", "", r1(sum(d, r => r[7]))] },
+        { name: "Roʻyxat", header: ["Sana", "Boshlandi", "Tugadi", "Davlat raqami", "Haydovchi", "Davomiyligi, daqiqa", "Turi", "Joy"],
+          rows: eachEvent(data, "stops", (t, x, e) => [x.date, e.start, e.end, plate(t), t.driver, e.dur, e.type, e.place]) }
+      ] },
+    { id: "geozona", file: "Geozonalar_hisoboti", name: "Geozonalar", desc: "Omborlar, mijozlar, AYOQSH va chegara postlariga tashriflar.",
+      sheets: data => {
+        const visits = eachEvent(data, "geo", (t, x, e) => [x.date, e.in, e.out, plate(t), t.driver, e.zone, e.dur]);
+        return [
+          { name: "Umumiy", header: ["№", "Geozona", "Tashriflar soni", "Mashinalar soni", "Jami turish, soat", "Oʻrtacha turish, daqiqa"],
+            rows: GEOZ.map(z => visits.filter(v => v[5] === z)).filter(v => v.length).sort((a, b) => b.length - a.length).map((v, i) => [i + 1, v[0][5], v.length, new Set(v.map(x => x[3])).size, r1(sum(v, x => x[6]) / 60), Math.round(sum(v, x => x[6]) / v.length)]),
+            total: d => ["", "Jami", sum(d, r => r[2]), "", r1(sum(d, r => r[4])), ""] },
+          { name: "Tashriflar", header: ["Sana", "Kirish", "Chiqish", "Davlat raqami", "Haydovchi", "Geozona", "Turish, daqiqa"], rows: visits }
+        ];
+      } },
+    { id: "haydovchi", file: "Haydovchilar_reytingi", name: "Haydovchilar reytingi", desc: "Xavfsiz va tejamli haydash bahosi, 100 balldan.",
+      sheets: data => {
+        const rows = data.map(({ t, days }) => {
+          const k = sum(days, x => x.km), v = sum(days, x => x.ev.speed.length), br = sum(days, x => x.brake), ac = sum(days, x => x.accel), idle = sum(days, x => x.idleH), u = sum(days, x => x.used);
+          const dev = pct(u, k * NORM / 100), per = k ? 100 / k : 0;
+          const score = Math.max(0, Math.min(100, Math.round(100 - v * per * 300 - br * per * 120 - ac * per * 80 - idle / Math.max(1, days.length) * 4 - Math.max(0, dev) * 1.2)));
+          return [0, t.driver, plate(t), r1(k), v, br, ac, r1(idle), dev, score, score >= 85 ? "Aʼlo" : score >= 70 ? "Yaxshi" : score >= 50 ? "Qoniqarli" : "Yomon"];
+        }).sort((a, b) => b[9] - a[9]);
+        rows.forEach((r, i) => r[0] = i + 1);
+        return [{ name: "Reyting", header: ["Oʻrin", "Haydovchi", "Davlat raqami", "Probeg, km", "Tezlik buzish", "Keskin tormoz", "Keskin tezlanish", "Salt, soat", "Yoqilgʻi farqi, %", "Ball (100)", "Baho"], rows, bad: (r, i) => i === 9 && r[9] < 50 }];
+      } }
+  ];
+  let repSel = "probeg", period = 7;
+  const periodText = N => N === 1 ? dstr(0) : dstr(N - 1) + " – " + dstr(0);
+  function reportSheets(rep) {
+    const data = T.map(t => ({ t, days: history(t, period) }));
+    return rep.sheets(data).map(sh => Object.assign(sh, { totalRow: sh.total ? sh.total(sh.rows) : null }));
+  }
   function renderReport() {
-    const max = Math.max(...T.map(t => t.todayKm));
-    const sorted = [...T].sort((a, b) => b.todayKm - a.todayKm);
-    document.getElementById("kmBars").innerHTML = sorted.map(t => `<div class="hbar"><span class="mono">${plate(t)}</span><span class="track"><i style="width:${(t.todayKm / max * 100).toFixed(1)}%"></i></span><span class="mono" style="text-align:right">${Math.round(t.todayKm)}</span></div>`).join("");
-    document.getElementById("reportTable").innerHTML = sorted.map(t => {
-      const idleH = t.id === 6 ? 2.4 : t.status === "move" ? 0.6 : 0.3;
-      const used = t.todayKm * (0.31 + (t.id % 4) * 0.012) + idleH * 2.4 + (t.id === 4 ? 0 : 0);
-      const per = used / t.todayKm * 100;
-      return `<tr><td class="mono">${plate(t)}</td><td>${t.driver}</td><td class="n">${Math.round(t.todayKm)}</td><td class="n">${(t.todayKm / 68).toFixed(1)}</td><td class="n">${idleH.toFixed(1)}</td><td class="n">${Math.round(used)}</td><td class="n ${per > 36.3 ? "bad" : ""}">${per.toFixed(1)}</td><td class="n ${t.viol ? "bad" : ""}">${t.viol}</td></tr>`;
+    document.getElementById("repPeriodText").textContent = "Davr: " + periodText(period) + ". Bugungi kun maʼlumotlari jonli yangilanadi.";
+    const rep = REPORTS.find(r => r.id === repSel);
+    const sheets = reportSheets(rep);
+    document.getElementById("repCards").innerHTML = REPORTS.map(r => `<button class="rep-card" type="button" data-rep="${r.id}" aria-pressed="${r.id === repSel}"><b>${r.name}</b><span>${r.desc}</span></button>`).join("");
+    document.getElementById("repTitle").textContent = rep.name + " hisoboti";
+    document.getElementById("repSheets").textContent = "Excel varaqlari: " + sheets.map(s => `${s.name} (${s.rows.length} qator)`).join(", ") + ". Quyida birinchi varaq.";
+    const sh = sheets[0];
+    const cell = (r, v, i) => `<td class="${typeof v === "number" ? "n" : ""} ${sh.bad && sh.bad(r, i) ? "bad" : ""}">${typeof v === "number" ? v.toLocaleString("ru-RU") : esc(v)}</td>`;
+    document.getElementById("repTable").innerHTML = `<thead><tr>${sh.header.map((h, i) => `<th class="${typeof sh.rows[0]?.[i] === "number" ? "n" : ""}">${h}</th>`).join("")}</tr></thead><tbody>${sh.rows.map(r => `<tr>${r.map((v, i) => cell(r, v, i)).join("")}</tr>`).join("")}${sh.totalRow ? `<tr class="total">${sh.totalRow.map((v, i) => cell([], v, i)).join("")}</tr>` : ""}</tbody>`;
+  }
+  function exportXlsx() {
+    const rep = REPORTS.find(r => r.id === repSel);
+    if (!window.XLSX) { toast("Excel kutubxonasi yuklanmadi. Internet aloqasini tekshiring."); return; }
+    const wb = XLSX.utils.book_new();
+    reportSheets(rep).forEach(sh => {
+      const head = [[`Yuk Nazorat · ${rep.name} hisoboti`], [`Davr: ${periodText(period)}`], [`Tuzildi: ${dstr(0)} ${hhmm(simMin)} · ${me.name}`], []];
+      const ws = XLSX.utils.aoa_to_sheet(head.concat([sh.header], sh.rows, sh.totalRow ? [sh.totalRow] : []));
+      ws["!cols"] = sh.header.map((h, i) => ({ wch: Math.min(40, Math.max(8, h.length + 2, ...sh.rows.slice(0, 300).map(r => String(r[i] ?? "").length + 2))) }));
+      if (sh.rows.length) ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: 4 + sh.rows.length, c: sh.header.length - 1 } }) };
+      XLSX.utils.book_append_sheet(wb, ws, sh.name);
+    });
+    const fname = `${rep.file}_${period === 1 ? dstr(0) : dstr(period - 1) + "-" + dstr(0)}.xlsx`;
+    try { XLSX.writeFile(wb, fname); toast(fname + " tayyorlandi"); } catch (e) { toast("Faylni yuklab boʻlmadi: " + e.message); }
+  }
+  document.getElementById("repCards").addEventListener("click", e => { const b = e.target.closest("[data-rep]"); if (b) { repSel = b.dataset.rep; renderReport(); } });
+  document.getElementById("repPeriod").addEventListener("click", e => {
+    const b = e.target.closest("[data-p]"); if (!b) return;
+    period = +b.dataset.p; document.querySelectorAll("#repPeriod [data-p]").forEach(c => c.setAttribute("aria-pressed", c === b)); renderReport();
+  });
+  document.getElementById("repXlsx").onclick = exportXlsx;
+
+  // ---------- admin ----------
+  const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  let toastT;
+  function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2800); }
+  const formErr = (id, msg) => { const p = document.getElementById(id); p.textContent = msg || ""; p.hidden = !msg; return false; };
+  const val = id => document.getElementById(id).value.trim();
+  const truckByImei = imei => imei && T.find(t => t.imei === imei);
+  const delBtn = (kind, id, why) => why ? `<button class="btn sm" type="button" disabled title="${esc(why)}">Oʻchirish</button>` : `<button class="btn sm" type="button" data-del="${kind}" data-id="${esc(id)}">Oʻchirish</button>`;
+  let extraN = 0;
+  function addTruck(o, id) {
+    const t = Object.assign({ id: id || Math.max(0, ...T.map(x => x.id), ...removedIds) + 1, at: [69.33 + (extraN % 4) * 0.07, 41.24 - Math.floor(extraN / 4) * 0.06], status: "stop", km0: 0, viol: 0, extra: true }, o);
+    extraN++; initTruck(t); T.push(t); addMarker(t); return t;
+  }
+  function saveTrucks() {
+    store.set("trucks", { extra: T.filter(t => t.extra).map(t => ({ id: t.id, reg: t.reg, num: t.num, model: t.model, driver: t.driver, tank: t.tank, imei: t.imei })), removed: removedIds, imei: Object.fromEntries(T.filter(t => !t.extra).map(t => [t.id, t.imei])) });
+  }
+  function deleteTruck(id) {
+    const i = T.findIndex(t => t.id === id); if (i < 0 || T.length === 1) return;
+    const t = T[i]; T.splice(i, 1); marks[id].g.remove(); delete marks[id];
+    if (!t.extra) removedIds.push(id);
+    if (selected === id) selected = T[0].id; if (fuelSel === id) fuelSel = T[0].id;
+    saveTrucks(); drawTrucks();
+  }
+  function renderTrucksAdmin() {
+    document.getElementById("admTrucks").innerHTML = T.map(t => {
+      const dv = devices.find(d => d.imei === t.imei);
+      return `<tr><td class="mono">${plate(t)}</td><td>${esc(t.model)}</td><td>${esc(t.driver)}</td><td class="n">${t.tank}</td><td>${dv ? `${esc(dv.model)}<br><span class="mono sub">${dv.imei}</span>` : `<span class="sub">Oʻrnatilmagan</span>`}</td><td><span class="pill s-${t.status}">${STATUS[t.status][0]}</span></td><td>${delBtn("truck", t.id, T.length === 1 ? "Oxirgi mashinani oʻchirib boʻlmaydi" : "")}</td></tr>`;
+    }).join("");
+    const free = devices.filter(d => !truckByImei(d.imei));
+    document.getElementById("ftDev").innerHTML = free.map(d => `<option value="${d.imei}">${esc(d.model)} · ${d.imei}</option>`).join("") + `<option value="">Qurilmasiz</option>`;
+  }
+  document.getElementById("ftReg").innerHTML = REGS.map(r => `<option>${r}</option>`).join("");
+  document.getElementById("formTruck").addEventListener("submit", e => {
+    e.preventDefault();
+    const num = val("ftNum").toUpperCase().replace(/^(\d{3})\s*([A-Z]{3})$/, "$1 $2"), reg = val("ftReg"), tank = +val("ftTank");
+    if (!/^\d{3} [A-Z]{3}$/.test(num)) return formErr("ftErr", "Davlat raqamini «123 ABC» koʻrinishida kiriting.");
+    if (T.some(t => plate(t) === reg + " " + num)) return formErr("ftErr", "Bu raqamli mashina allaqachon bor.");
+    if (!val("ftModel") || !val("ftDriver")) return formErr("ftErr", "Model va haydovchi ismini kiriting.");
+    if (!(tank >= 50 && tank <= 1500)) return formErr("ftErr", "Bak hajmi 50 dan 1500 litrgacha boʻlishi kerak.");
+    formErr("ftErr", "");
+    addTruck({ reg, num, model: val("ftModel"), driver: val("ftDriver"), tank, imei: val("ftDev") || null });
+    saveTrucks(); drawTrucks(); e.target.reset(); document.getElementById("ftTank").value = 400; renderTrucksAdmin(); toast(`${reg} ${num} qoʻshildi`);
+  });
+
+  function renderDevices() {
+    document.getElementById("admDevices").innerHTML = devices.map(d => {
+      const t = truckByImei(d.imei);
+      const st = !t ? ["Omborda", "s-stop"] : t.status === "offline" ? ["Aloqa yoʻq", "s-offline"] : ["Onlayn", "s-move"];
+      return `<tr><td class="mono">${d.imei}</td><td>${esc(d.model)}</td><td>${MODELS[d.model] || "—"}</td><td class="mono">${esc(d.sim)}</td><td class="mono">${t ? plate(t) : "—"}</td><td>${t ? ago(t) : "—"}</td><td><span class="pill ${st[1]}">${st[0]}</span></td><td>${delBtn("device", d.imei, t ? "Avval qurilmani mashinadan ajrating" : "")}</td></tr>`;
     }).join("");
   }
+  document.getElementById("fdModel").innerHTML = Object.keys(MODELS).map(m => `<option>${m}</option>`).join("");
+  document.getElementById("formDevice").addEventListener("submit", e => {
+    e.preventDefault();
+    const imei = val("fdImei"), sim = val("fdSim");
+    if (!/^\d{15}$/.test(imei)) return formErr("fdErr", "IMEI 15 ta raqamdan iborat boʻlishi kerak. U qurilma yorligʻida yozilgan.");
+    if (devices.some(d => d.imei === imei)) return formErr("fdErr", "Bu IMEI allaqachon roʻyxatda bor.");
+    if (!/^\+998[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}$/.test(sim)) return formErr("fdErr", "SIM raqamini +998 90 123 45 67 koʻrinishida kiriting.");
+    formErr("fdErr", "");
+    devices.push({ imei, model: val("fdModel"), sim, fw: "—" }); store.set("devices", devices);
+    e.target.reset(); renderDevices(); toast("Qurilma qoʻshildi");
+  });
+
+  function renderUsers() {
+    document.getElementById("admUsers").innerHTML = users.map(u => {
+      const self = me && u.id === me.id;
+      return `<tr><td>${esc(u.name)}${self ? ` <span class="sub">(siz)</span>` : ""}</td><td class="mono">${esc(u.login)}</td><td>${ROLES[u.role]}</td><td class="mono">${esc(u.phone)}</td><td>${esc(u.tg) || "—"}</td>
+        <td>${self ? `<span class="pill s-move">Faol</span>` : `<button class="btn sm" type="button" data-toggle-user="${u.id}" title="Bosib holatni oʻzgartiring">${u.active ? "Faol" : "Bloklangan"}</button>`}</td>
+        <td>${delBtn("user", u.id, self ? "Oʻzingizni oʻchira olmaysiz" : "")}</td></tr>`;
+    }).join("");
+  }
+  document.getElementById("fuRole").innerHTML = Object.entries(ROLES).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+  document.getElementById("admUsers").addEventListener("click", e => {
+    const b = e.target.closest("[data-toggle-user]"); if (!b) return;
+    const u = users.find(x => x.id === +b.dataset.toggleUser); u.active = !u.active; store.set("users", users); renderUsers();
+    toast(u.name + (u.active ? " faollashtirildi" : " bloklandi"));
+  });
+  document.getElementById("formUser").addEventListener("submit", e => {
+    e.preventDefault();
+    const login = val("fuLogin").toLowerCase();
+    if (!val("fuName")) return formErr("fuErr", "Ism familiyani kiriting.");
+    if (!/^[a-z0-9_.]{3,20}$/.test(login)) return formErr("fuErr", "Login 3–20 ta lotin harf yoki raqamdan iborat boʻlsin.");
+    if (users.some(u => u.login === login)) return formErr("fuErr", "Bu login band.");
+    formErr("fuErr", "");
+    users.push({ id: Math.max(0, ...users.map(u => u.id)) + 1, name: val("fuName"), login, role: val("fuRole"), phone: val("fuPhone"), tg: val("fuTg"), active: true });
+    store.set("users", users); e.target.reset(); renderUsers(); toast("Foydalanuvchi qoʻshildi");
+  });
+
+  function renderSettings() {
+    const set = (id, v) => { document.getElementById(id).value = v; };
+    set("fsSpeed", S.speedLimit); set("fsDrain", S.drainL); set("fsIdle", S.idleMin); set("fsInt", S.interval); set("fsTg", S.tgChat);
+    [["fsChWeb", "web"], ["fsChTg", "tg"], ["fsChSms", "sms"], ["fsChMail", "email"]].forEach(([id, k]) => { document.getElementById(id).checked = !!S.ch[k]; });
+  }
+  document.getElementById("formSettings").addEventListener("submit", e => {
+    e.preventDefault();
+    const sp = +val("fsSpeed"), dr = +val("fsDrain"), id = +val("fsIdle");
+    if (!(sp >= 40 && sp <= 130)) return formErr("fsErr", "Tezlik chegarasi 40 dan 130 km/soatgacha boʻlishi kerak.");
+    if (!(dr >= 5 && dr <= 200)) return formErr("fsErr", "Toʻkish chegarasi 5 dan 200 litrgacha boʻlishi kerak.");
+    if (!(id >= 5 && id <= 120)) return formErr("fsErr", "Salt ishlash chegarasi 5 dan 120 daqiqagacha boʻlishi kerak.");
+    formErr("fsErr", "");
+    S = { speedLimit: sp, drainL: dr, idleMin: id, interval: +val("fsInt"), tgChat: val("fsTg"), ch: { web: fsChWeb.checked, tg: fsChTg.checked, sms: fsChSms.checked, email: fsChMail.checked } };
+    store.set("settings", S); toast("Sozlamalar saqlandi");
+  });
+  document.getElementById("fsReset").addEventListener("click", e => {
+    const b = e.currentTarget;
+    if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Tasdiqlang: hammasi tiklanadi"; b.classList.add("danger"); setTimeout(() => { b.dataset.armed = ""; b.textContent = "Demo maʼlumotlarni tiklash"; b.classList.remove("danger"); }, 3500); return; }
+    ["users", "devices", "settings", "trucks"].forEach(k => store.del(k)); location.reload();
+  });
+
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-del]"); if (!b) return;
+    if (b.dataset.armed !== "1") {
+      b.dataset.armed = "1"; b.textContent = "Tasdiqlang"; b.classList.add("danger");
+      setTimeout(() => { if (b.isConnected) { b.dataset.armed = ""; b.textContent = "Oʻchirish"; b.classList.remove("danger"); } }, 3000);
+      return;
+    }
+    const id = b.dataset.id, k = b.dataset.del;
+    if (k === "truck") { deleteTruck(+id); renderTrucksAdmin(); }
+    if (k === "device") { devices = devices.filter(d => d.imei !== id); store.set("devices", devices); renderDevices(); }
+    if (k === "user") { users = users.filter(u => u.id !== +id); store.set("users", users); renderUsers(); }
+    toast("Oʻchirildi");
+  });
+
+  // ---------- login ----------
+  let me = null, sid = store.get("session", null);
+  function applySession() {
+    me = users.find(u => u.id === sid && u.active && ROLE_VIEWS[u.role]) || null;
+    document.getElementById("login").hidden = !!me;
+    document.querySelector(".topbar").hidden = !me;
+    document.querySelector("main").hidden = !me;
+    if (!me) return;
+    document.getElementById("userName").innerHTML = `${esc(me.name)}<span class="role">${ROLES[me.role]}</span>`;
+    document.querySelectorAll("nav.tabs a").forEach(a => { a.hidden = !ROLE_VIEWS[me.role].includes(a.dataset.view); });
+    go();
+  }
+  document.querySelector(".acct-row").addEventListener("click", e => {
+    const b = e.target.closest("[data-login]"); if (!b) return;
+    document.getElementById("lgUser").value = b.dataset.login; document.getElementById("lgPass").value = DEMO_PASS;
+    document.querySelectorAll(".acct").forEach(x => x.setAttribute("aria-pressed", x === b));
+    document.getElementById("lgPass").focus();
+  });
+  document.getElementById("loginForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const u = users.find(x => x.login === val("lgUser").toLowerCase());
+    if (!u || val("lgPass") !== DEMO_PASS) return formErr("lgErr", "Login yoki parol notoʻgʻri.");
+    if (!u.active) return formErr("lgErr", "Bu foydalanuvchi bloklangan. Administratorga murojaat qiling.");
+    if (!ROLE_VIEWS[u.role]) return formErr("lgErr", `«${ROLES[u.role]}» roli uchun ekran hali tayyor emas. Demo’da Logistika rahbari va Administrator ishlaydi.`);
+    formErr("lgErr", ""); sid = u.id; store.set("session", u.id); history_reset(); applySession();
+  });
+  function history_reset() { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; } }
+  document.getElementById("logout").addEventListener("click", () => { store.del("session"); sid = null; me = null; applySession(); document.getElementById("lgPass").value = ""; });
 
   // ---------- routing ----------
-  const VIEWS = ["xarita", "yoqilgi", "ogohlantirish", "hisobot"];
+  const VIEWS = ["xarita", "yoqilgi", "ogohlantirish", "hisobot", "mashinalar", "qurilmalar", "foydalanuvchilar", "sozlamalar"];
   function go() {
-    const h = location.hash.slice(1); route_ = VIEWS.includes(h) ? h : "xarita";
+    if (!me) return;
+    const allowed = ROLE_VIEWS[me.role]; const h = location.hash.slice(1); route_ = allowed.includes(h) ? h : allowed[0];
     VIEWS.forEach(v => document.getElementById("view-" + v).hidden = v !== route_);
     document.querySelectorAll("nav.tabs a").forEach(a => a.dataset.view === route_ ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
     if (route_ === "yoqilgi") renderFuel();
     if (route_ === "ogohlantirish") renderAlerts();
     if (route_ === "hisobot") renderReport();
+    if (route_ === "mashinalar") renderTrucksAdmin();
+    if (route_ === "qurilmalar") renderDevices();
+    if (route_ === "foydalanuvchilar") renderUsers();
+    if (route_ === "sozlamalar") renderSettings();
   }
   window.addEventListener("hashchange", go);
 
@@ -572,12 +1067,12 @@ tr:last-child td { border-bottom: 0; }
     T.forEach(t => {
       if (t.status === "offline") return;
       t.last = simMin;
-      if (t.status === "idle") { t.fuel -= 0.04; t.idleMin++; if (t.idleMin % 30 === 0) addAlert("warn", t, `Uzoq salt ishlash: ${t.idleMin} daqiqa`, "Dvigatel ishlab turibdi, tezlik 0."); return; }
+      if (t.status === "idle") { t.fuel -= 0.04; t.idleMin++; if (t.idleMin >= S.idleMin && (t.idleMin - S.idleMin) % 30 === 0) addAlert("warn", t, `Uzoq salt ishlash: ${t.idleMin} daqiqa`, "Dvigatel ishlab turibdi, tezlik 0."); return; }
       if (!t.r) return;
       if (t.pause > 0) { t.pause--; t.speed = 0; if (t.pause === 0) { t.status = "move"; t.dir = -t.dir; t.speed = 50; } return; }
       t.speed = Math.max(40, Math.min(99, t.speed + (Math.sin(tick / 6 + t.id) * 4 + (((tick * 13 + t.id * 7) % 11) - 5) * 0.8)));
       const d = t.speed / 60; t.s += d * t.dir; t.todayKm += d; t.odo += d; t.fuel -= d * 0.33;
-      if (t.speed > 90 && (!t.lastViol || tick - t.lastViol > 25)) { t.lastViol = tick; t.viol++; addAlert("warn", t, `Tezlik oshirildi: ${Math.round(t.speed)} km/soat`, `Chegara 90 km/soat. ${nearest(t.lon, t.lat)}.`); }
+      if (t.speed > S.speedLimit && (!t.lastViol || tick - t.lastViol > 25)) { t.lastViol = tick; t.viol++; addAlert("warn", t, `Tezlik oshirildi: ${Math.round(t.speed)} km/soat`, `Chegara ${S.speedLimit} km/soat. ${nearest(t.lon, t.lat)}.`); }
       if (t.s >= t.r.len || t.s <= 0) {
         t.s = Math.max(0, Math.min(t.r.len, t.s)); t.status = "stop"; t.speed = 0; t.pause = 20;
         addAlert("info", t, `Manzilga yetib keldi: ${C[t.dir > 0 ? t.r.keys.at(-1) : t.r.keys[0]][2]}`, "Yuk tushirish uchun toʻxtadi.");
@@ -591,12 +1086,14 @@ tr:last-child td { border-bottom: 0; }
     if (route_ === "xarita") { renderKpis(); renderList(); renderDetail(); }
     else if (route_ === "hisobot" && tick % 5 === 0) renderReport();
     else if (route_ === "yoqilgi" && tick % 30 === 0) renderFuel();
+    else if (route_ === "qurilmalar" && tick % 15 === 0) renderDevices();
   }
 
   // seed trails with some past movement for moving trucks
   T.forEach(t => { if (!t.r) return; for (let k = 60; k > 0; k--) { const p = posAt(t.r, t.s - k * 1.15 * t.dir, t.dir); t.trail.push(P(p.lon, p.lat)); } });
 
-  drawTrucks(); renderKpis(); renderList(); renderDetail(); renderBadge(); go();
+  (savedTrucks.extra || []).forEach(o => addTruck(o, o.id));
+  drawTrucks(); renderKpis(); renderList(); renderDetail(); renderBadge(); applySession();
   setInterval(step, 1000);
 })();
 </script>

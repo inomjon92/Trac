@@ -2,22 +2,30 @@
 
 Yuk avtomobillari parkini GPS orqali kuzatish tizimining demo interfeysi.
 
-Bo'limlar:
+## Rollar (demo hisoblar)
 
-- **Xarita**: mashinalar joylashuvi, holati va mashina kartochkasi
-- **Yoqilg'i**: bakdagi yoqilg'i grafigi, quyish va to'kish hodisalari
-- **Ogohlantirishlar**: tezlik oshirish, yoqilg'i to'kish, aloqa yo'qolishi
-- **Hisobotlar**: kunlik probeg va yoqilg'i sarfi
+| Rol | Login | Parol | Bo'limlar |
+| --- | --- | --- | --- |
+| Logistika rahbari | `rahbar` | `demo123` | Xarita, Yoqilg'i, Ogohlantirishlar, Hisobotlar |
+| Administrator | `admin` | `demo123` | Xarita, Mashinalar, GPS qurilmalar, Foydalanuvchilar, Sozlamalar |
 
-Barcha ma'lumotlar namunaviy (demo) va brauzerda simulyatsiya qilinadi. Hozircha server, ma'lumotlar bazasi va GPS qurilmalar ulanmagan.
+## Hisobotlar (Excelga yuklab olinadi)
+
+Davrni tanlash mumkin: bugun, 7 kun yoki 30 kun. Har bir Excel fayl bir nechta varaqdan iborat.
+
+- **Probeg (km)**: umumiy jadval va kunlik jadval
+- **Yoqilg'i**: umumiy, kunlik, quyishlar va to'kishlar
+- **Tezlik**: umumiy jadval va har bir buzish
+- **To'xtashlar**: umumiy jadval va to'xtashlar ro'yxati
+- **Geozonalar**: umumiy jadval va tashriflar
+- **Haydovchilar reytingi**: 100 balllik baho
+
+Barcha ma'lumotlar namunaviy (demo) va brauzerda simulyatsiya qilinadi. Administrator kiritgan o'zgarishlar faqat shu brauzerda saqlanadi. Hozircha server, ma'lumotlar bazasi va GPS qurilmalar ulanmagan.
 
 ## Ishga tushirish
 
-Bu oddiy statik sayt: `index.html` faylini brauzerda ochish kifoya.
+Bu oddiy statik sayt: `index.html` faylini brauzerda ochish kifoya. Excel eksport uchun SheetJS kutubxonasi cdnjs orqali yuklanadi.
 
-## Vercelga joylash
+## Vercel
 
-1. [vercel.com/new](https://vercel.com/new) sahifasiga kiring va GitHub orqali tizimga kiring.
-2. `Trac` repozitoriyasini tanlab **Import** tugmasini bosing.
-3. Framework Preset maydonida **Other** qoldiring, build buyrug'i kerak emas.
-4. **Deploy** tugmasini bosing. Har bir yangi `git push` saytni avtomatik yangilaydi.
+Repozitoriya Vercelga ulangan. `main` branchiga qilingan har bir push saytni avtomatik yangilaydi.
